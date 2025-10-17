@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.main;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -7,16 +7,23 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.Servo;
 
-@TeleOp(name = "Testing: Boots", group = "Testing")
-public class TestingBoots extends LinearOpMode {
+@TeleOp(name = "Testing: Main", group = "Testing")
+public class Main extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         DcMotor frontLeft = hardwareMap.dcMotor.get("frontLeft");
         DcMotor backLeft = hardwareMap.dcMotor.get("backLeft");
         DcMotor frontRight = hardwareMap.dcMotor.get("frontRight");
         DcMotor backRight = hardwareMap.dcMotor.get("backRight");
+
+        DcMotor launchRight = hardwareMap.dcMotor.get("launchRight");
+        DcMotor launchLeft = hardwareMap.dcMotor.get("launchLeft");
+        launchRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        launchLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        launchRight.setDirection(DcMotorSimple.Direction.REVERSE);
+
+
 
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -34,9 +41,18 @@ public class TestingBoots extends LinearOpMode {
         // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
         imu.initialize(parameters);
 
-        CRServo sweeper1 = hardwareMap.get(CRServo.class, "sweeper1");
-        CRServo sweeper2 = hardwareMap.get(CRServo.class, "sweeper2");
+        CRServo sweeperR = hardwareMap.get(CRServo.class, "sweeper1");
+        CRServo sweeperL = hardwareMap.get(CRServo.class, "sweeper2");
+        CRServo sweeperUp = hardwareMap.get(CRServo.class, "sweeper3");
+        CRServo sweeperDown = hardwareMap.get(CRServo.class, "sweeper4");
 
+        DcMotor boot = hardwareMap.dcMotor.get("boot");
+        boot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
+        int butBoot = 0;
+        int butSweeperUp = 0;
+        int butSweeperBottom = 0;
+        int butLauncher = 0;
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -85,21 +101,50 @@ public class TestingBoots extends LinearOpMode {
             frontRight.setPower(frontRightPower* 1);
             backRight.setPower(backRightPower* 1);
 
-            if(gamepad1.a) {
-                sweeper1.setPower(1);
-                sweeper2.setPower(-1);
+            if(gamepad2.x){
+                if(butBoot % 2 == 0) {
+                    boot.setPower(0.89);
+                } else {
+                    boot.setPower(0);
+                }
+
+                butBoot++;
             }
 
-            if(gamepad1.b){
-                sweeper1.setPower(0.0);
-                sweeper2.setPower(0.0);
+            if(gamepad2.a){
+                if(butSweeperBottom % 2 == 0) {
+                    sweeperR.setPower(1);
+                    sweeperL.setPower(-1);
+                } else {
+                    sweeperR.setPower(0);
+                    sweeperL.setPower(0);
+                }
+                butSweeperBottom++;
             }
 
-            if(gamepad1.x){
-                sweeper1.setPower(-1);
-                sweeper2.setPower(1);
+            if(gamepad2.b){
+                if(butSweeperUp % 2 == 0) {
+                    sweeperUp.setPower(1);
+                    sweeperDown.setPower(-1);
+                } else {
+                    sweeperUp.setPower(0);
+                    sweeperDown.setPower(0);
+                }
+                butSweeperUp++;
             }
 
+            if(gamepad2.y){
+                if(butLauncher % 2 == 0) {
+                    launchRight.setPower(1);
+                    launchLeft.setPower(1);
+                } else {
+                    launchRight.setPower(0);
+                    launchLeft.setPower(0);
+                }
+                butLauncher++;
+            }
+//
+//
         }
 
 

@@ -70,6 +70,11 @@ public final class TuningOpModes {
 
     private static PinpointView makePinpointView(PinpointLocalizer pl) {
         return new PinpointView() {
+            @Override
+            public float getHeadingVelocity() {
+                return 0;
+            }
+
             GoBildaPinpointDriver.EncoderDirection parDirection = pl.initialParDirection;
             GoBildaPinpointDriver.EncoderDirection perpDirection = pl.initialPerpDirection;
 
@@ -88,7 +93,6 @@ public final class TuningOpModes {
                 return pl.driver.getEncoderY();
             }
 
-            @Override
             public float getHeadingVelocity(UnnormalizedAngleUnit unit) {
                 return (float) pl.driver.getHeadingVelocity(unit);
             }
@@ -180,7 +184,7 @@ public final class TuningOpModes {
                 }
 
                 return new DriveView(
-                    DriveType.MECANUM,
+                        DriveType.MECANUM,
                         MecanumDrive.PARAMS.inPerTick,
                         MecanumDrive.PARAMS.maxWheelVel,
                         MecanumDrive.PARAMS.minProfileAccel,
