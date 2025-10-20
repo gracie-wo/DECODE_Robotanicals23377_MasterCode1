@@ -49,6 +49,9 @@ public class Main extends LinearOpMode {
         DcMotor boot = hardwareMap.dcMotor.get("boot");
         boot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
+        DcMotor linAc1 = hardwareMap.dcMotor.get("linAc1");
+        linAc1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
@@ -129,6 +132,19 @@ public class Main extends LinearOpMode {
                 //second line of boots on
                 sweeperUp.setPower(0);
                 sweeperDown.setPower(0);
+            }
+
+            //lin Act
+            if(gamepad2.dpad_up){
+                linAc1.setPower(1);
+            }
+
+            if(gamepad2.dpad_down){
+                linAc1.setPower(0);
+            }
+
+            if(gamepad2.dpad_right){
+                linAc1.setPower(-1);
             }
 
         }
