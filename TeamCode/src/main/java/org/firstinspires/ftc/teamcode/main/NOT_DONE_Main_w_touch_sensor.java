@@ -1,15 +1,18 @@
 package org.firstinspires.ftc.teamcode.main;
 
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.TouchSensor;
 
-@TeleOp(name = "Main", group = "Main")
-public class Main extends LinearOpMode {
+@Disabled
+@TeleOp(name = "Testing: Main - touch sensor", group = "Testing")
+public class NOT_DONE_Main_w_touch_sensor extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         DcMotor frontLeft = hardwareMap.dcMotor.get("frontLeft");
@@ -23,7 +26,9 @@ public class Main extends LinearOpMode {
         launchLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         launchRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
-
+        TouchSensor sensor_row_3 = hardwareMap.get(TouchSensor.class, "test_touch");
+        TouchSensor sensor_row_2 = hardwareMap.get(TouchSensor.class, "test_touch");
+        TouchSensor sensor_row_1 = hardwareMap.get(TouchSensor.class, "test_touch");
 
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -41,10 +46,12 @@ public class Main extends LinearOpMode {
         // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
         imu.initialize(parameters);
 
-        CRServo sweeperR = hardwareMap.get(CRServo.class, "sweeper1");
-        CRServo sweeperL = hardwareMap.get(CRServo.class, "sweeper2");
-        CRServo sweeperUp = hardwareMap.get(CRServo.class, "sweeper3");
-        CRServo sweeperDown = hardwareMap.get(CRServo.class, "sweeper4");
+        CRServo sweeper_row_1_R = hardwareMap.get(CRServo.class, "sweeper1");
+        CRServo sweeper_row_1_L = hardwareMap.get(CRServo.class, "sweeper2");
+        CRServo sweeper_row_2_R = hardwareMap.get(CRServo.class, "sweeper3");
+        CRServo sweeper_row_2_L = hardwareMap.get(CRServo.class, "sweeper4");
+        CRServo sweeper_row_3_R = hardwareMap.get(CRServo.class, "sweeper5");
+        CRServo sweeper_row_3_L = hardwareMap.get(CRServo.class, "sweeper6");
 
         DcMotor boot = hardwareMap.dcMotor.get("boot");
         boot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -96,39 +103,76 @@ public class Main extends LinearOpMode {
             frontRight.setPower(frontRightPower* 1);
             backRight.setPower(backRightPower* 1);
 
+            boolean intakeOn = false;
+
             //turn intake on
-            if(gamepad2.x){
+            if(gamepad1.x){
+                intakeOn = true;
+                //intake on
                 boot.setPower(0.89);
-                //first line of boots on
-                sweeperR.setPower(1);
-                sweeperL.setPower(-1);
+            }
+
+            while(!sensor_row_3.isPressed() && intakeOn){
+                sweeper_row_2_R.setPower(1);
+                sweeper_row_2_L.setPower(-1);
+            }
+
+            while(!sensor_row_2.isPressed() && intakeOn) {
+                sweeper_row_1_R.setPower(1);
+                sweeper_row_1_L.setPower(-1);
             }
 
             //turn intake off
-            if(gamepad2.y){
+            if(gamepad1.y){
+                intakeOn = false;
+
                 boot.setPower(0);
-                //first line of boots off
-                sweeperR.setPower(0);
-                sweeperL.setPower(0);
+
+                sweeper_row_1_R.setPower(0);
+                sweeper_row_1_L.setPower(0);
+
+                sweeper_row_2_R.setPower(0);
+                sweeper_row_2_L.setPower(0);
+
+                sweeper_row_3_R.setPower(0);
+                sweeper_row_3_L.setPower(0);
             }
 
+            boolean launchOn = false;
             //second line of boots on
             if(gamepad2.a){
+                launchOn = true;
                 launchRight.setPower(1);
                 launchLeft.setPower(1);
 
-                //second line of boots on
-                sweeperUp.setPower(1);
-                sweeperDown.setPower(-1);
+                //CHECK DIRECTION
+                sweeper_row_3_R.setPower(1);
+                sweeper_row_3_L.setPower(-1);
             }
 
-            if(gamepad2.b) {
+            while(!sensor_row_3.isPressed() && launchOn){
                 launchRight.setPower(0);
                 launchLeft.setPower(0);
 
-                //second line of boots on
-                sweeperUp.setPower(0);
-                sweeperDown.setPower(0);
+                //CHECK DIRECTION
+                sweeper_row_3_R.setPower(0);
+                sweeper_row_3_L.setPower(0);
+
+                sweeper_row_2_R.setPower(1);
+                sweeper_row_2_L.setPower(-1);
+
+                sweeper_row_1_R.setPower(1);
+                sweeper_row_1_L.setPower(-1);
+            }
+
+            if(sensor_row_3.isPressed() && launchOn){
+                sweeper_row_2_R.setPower(0);
+                sweeper_row_2_L.setPower(0);
+
+                sweeper_row_1_R.setPower(0);
+                sweeper_row_1_L.setPower(0);
+
+                launchOn = false;
             }
 
         }
