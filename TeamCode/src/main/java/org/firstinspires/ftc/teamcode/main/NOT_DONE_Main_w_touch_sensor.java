@@ -56,6 +56,9 @@ public class NOT_DONE_Main_w_touch_sensor extends LinearOpMode {
         DcMotor boot = hardwareMap.dcMotor.get("boot");
         boot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
 
+        boolean intakeOn = false;
+        boolean launchOn = false;
+
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
@@ -103,7 +106,6 @@ public class NOT_DONE_Main_w_touch_sensor extends LinearOpMode {
             frontRight.setPower(frontRightPower* 1);
             backRight.setPower(backRightPower* 1);
 
-            boolean intakeOn = false;
 
             //turn intake on
             if(gamepad1.x){
@@ -138,7 +140,6 @@ public class NOT_DONE_Main_w_touch_sensor extends LinearOpMode {
                 sweeper_row_3_L.setPower(0);
             }
 
-            boolean launchOn = false;
             //second line of boots on
             if(gamepad2.a){
                 launchOn = true;
