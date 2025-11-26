@@ -12,7 +12,7 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 
 @Disabled
 @TeleOp(name = "Testing: Main - touch sensor", group = "Testing")
-public class NOT_DONE_Main_w_touch_sensor extends LinearOpMode {
+public class DISABLED_NOT_DONE_Main_w_touch_sensor extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         DcMotor frontLeft = hardwareMap.dcMotor.get("frontLeft");

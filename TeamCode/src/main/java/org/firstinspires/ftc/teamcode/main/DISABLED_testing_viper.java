@@ -1,15 +1,15 @@
 package org.firstinspires.ftc.teamcode.main;
 
-import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.IMU;
 
+
+@Disabled
 @TeleOp(name = "viper", group = "Testing")
-public class testing_viper extends LinearOpMode {
+public class DISABLED_testing_viper extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 //        DcMotor frontLeft = hardwareMap.dcMotor.get("frontLeft");
@@ -143,7 +143,7 @@ public class testing_viper extends LinearOpMode {
             if(gamepad2.dpad_up){
                 //going out
                 linAc1.setPower(1);
-                linAc2.setPower(0.80);
+                linAc2.setPower(1);
             }
 
             if(gamepad2.dpad_down){

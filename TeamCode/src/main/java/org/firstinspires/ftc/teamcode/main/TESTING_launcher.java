@@ -9,11 +9,16 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.TouchSensor;
 
-@TeleOp(name = "launcher", group = "Testing")
+@TeleOp(name = "two launchers", group = "Testing")
 public class TESTING_launcher extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        DcMotor launcher = hardwareMap.dcMotor.get("launch");
+
+        DcMotor launchRight = hardwareMap.dcMotor.get("launchRight");
+        DcMotor launchLeft = hardwareMap.dcMotor.get("launchLeft");
+        launchRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launchLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launchRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -27,15 +32,18 @@ public class TESTING_launcher extends LinearOpMode {
         while (opModeIsActive()) {
 
             if(gamepad1.a){
-                launcher.setPower(1);
+                launchRight.setPower(1);
+                launchLeft.setPower(-1);
             }
 
             if(gamepad1.b){
-                launcher.setPower(-1);
+                launchRight.setPower(0);
+                launchLeft.setPower(0);
             }
 
             if(gamepad1.x){
-                launcher.setPower(0);
+                launchRight.setPower(-1);
+                launchLeft.setPower(1);
             }
         }
 
