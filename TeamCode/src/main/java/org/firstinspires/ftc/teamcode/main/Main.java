@@ -39,11 +39,13 @@ public class Main extends LinearOpMode {
         CRServo sweeper2R = hardwareMap.get(CRServo.class, "sweeper3");
         CRServo sweeper2L = hardwareMap.get(CRServo.class, "sweeper4");
 
-        DcMotor boot = hardwareMap.dcMotor.get("boot");
-        boot.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        CRServo intake_rotate = hardwareMap.get(CRServo.class, "intake_rotate");
 
-        DcMotor launcher = hardwareMap.dcMotor.get("launcher");
-        launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        DcMotor launchRight = hardwareMap.dcMotor.get("launchRight");
+        DcMotor launchLeft = hardwareMap.dcMotor.get("launchLeft");
+        launchRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launchLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launchRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
         Servo rotator = hardwareMap.get(Servo.class, "rotator");
 
@@ -125,24 +127,16 @@ public class Main extends LinearOpMode {
             }
 
             if(gamepad1.dpad_up){
-                boot.setPower(0.89);
+                intake_rotate.setPower(-1);
             }
 
             if(gamepad1.dpad_down){
-                boot.setPower(0);
+                intake_rotate.setPower(0);
             }
 
             //gamepad2
-            if(gamepad2.a){
-                rotator.setPosition(1);
-            }
-
             if(gamepad2.b){
                 rotator.setPosition(0);
-            }
-
-            if(gamepad2.x){
-                rotator.setPosition(0.5);
             }
 
             if(gamepad2.dpad_up){
@@ -164,15 +158,13 @@ public class Main extends LinearOpMode {
             }
 
             if(gamepad2.dpad_left){
-                launcher.setPower(-1);
-            }
-
-            if(gamepad2.right_bumper){
-                launcher.setPower(1);
+                launchRight.setPower(1);
+                launchLeft.setPower(1);
             }
 
             if(gamepad2.left_bumper){
-                launcher.setPower(0);
+                launchRight.setPower(0);
+                launchLeft.setPower(0);
             }
 
         }
