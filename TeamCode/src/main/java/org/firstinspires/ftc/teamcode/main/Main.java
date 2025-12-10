@@ -13,7 +13,6 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class Main extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
-        double rotator_position = 0;
 
         DcMotor frontLeft = hardwareMap.dcMotor.get("frontLeft");
         DcMotor backLeft = hardwareMap.dcMotor.get("backLeft");
