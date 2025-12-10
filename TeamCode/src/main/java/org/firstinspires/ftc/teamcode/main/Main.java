@@ -13,10 +13,15 @@ import com.qualcomm.robotcore.hardware.Servo;
 public class Main extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
+        double rotator_position = 0;
+
         DcMotor frontLeft = hardwareMap.dcMotor.get("frontLeft");
         DcMotor backLeft = hardwareMap.dcMotor.get("backLeft");
         DcMotor frontRight = hardwareMap.dcMotor.get("frontRight");
         DcMotor backRight = hardwareMap.dcMotor.get("backRight");
+
+        DcMotor intake = hardwareMap.dcMotor.get("intake");
+        intake.setDirection(DcMotorSimple.Direction.REVERSE);
 
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -38,8 +43,9 @@ public class Main extends LinearOpMode {
         CRServo sweeper1L = hardwareMap.get(CRServo.class, "sweeper2");
         CRServo sweeper2R = hardwareMap.get(CRServo.class, "sweeper3");
         CRServo sweeper2L = hardwareMap.get(CRServo.class, "sweeper4");
+        CRServo sweeper3L = hardwareMap.get(CRServo.class, "sweeper5");
+        CRServo sweeper3R = hardwareMap.get(CRServo.class, "sweeper6");
 
-        CRServo intake_rotate = hardwareMap.get(CRServo.class, "intake_rotate");
 
         DcMotor launchRight = hardwareMap.dcMotor.get("launchRight");
         DcMotor launchLeft = hardwareMap.dcMotor.get("launchLeft");
@@ -49,13 +55,6 @@ public class Main extends LinearOpMode {
 
         Servo rotator = hardwareMap.get(Servo.class, "rotator");
 
-        DcMotor linAc1 = hardwareMap.dcMotor.get("linAc1");
-        linAc1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        linAc1.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        DcMotor linAc2 = hardwareMap.dcMotor.get("linAc2");
-        linAc2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        linAc2.setDirection(DcMotorSimple.Direction.REVERSE);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -104,71 +103,74 @@ public class Main extends LinearOpMode {
             frontRight.setPower(frontRightPower* 1);
             backRight.setPower(backRightPower* 1);
 
+            //intake on
             if(gamepad1.a){
-                sweeper1R.setPower(1);
-                sweeper1L.setPower(-1);
+                intake.setPower(1);
+
+                sweeper1R.setPower(-0.45);
+                sweeper1L.setPower(0.45);
+
+                sweeper2R.setPower(-0.1);
+                sweeper2L.setPower(0.1);
+
+                sweeper3R.setPower(0.5);
+                sweeper3L.setPower(-0.5);
+            }
+
+            //intake off
+            if(gamepad1.y){
+                intake.setPower(0);
+
+                sweeper1R.setPower(0);
+                sweeper1L.setPower(0);
 
                 sweeper2R.setPower(0);
                 sweeper2L.setPower(0);
+
+                sweeper3R.setPower(0);
+                sweeper3L.setPower(0);
             }
 
-            if(gamepad1.b){
-                sweeper1R.setPower(1);
-                sweeper1L.setPower(-1);
-                sweeper2R.setPower(1);
-                sweeper2L.setPower(-1);
+            //gamepad 2
+            //launch from far away
+            if(gamepad2.x){
+                intake.setPower(1);
+
+                sweeper1R.setPower(-1);
+                sweeper1L.setPower(1);
+                sweeper2R.setPower(-1);
+                sweeper2L.setPower(1);
+                sweeper3R.setPower(-1);
+                sweeper3L.setPower(1);
+
+                launchRight.setPower(0.63);
+                launchLeft.setPower(0.63);
             }
 
-            if(gamepad1.x){
+            if(gamepad2.b){
+                intake.setPower(0);
+
                 sweeper1R.setPower(0);
                 sweeper1L.setPower(0);
                 sweeper2R.setPower(0);
                 sweeper2L.setPower(0);
-            }
+                sweeper3R.setPower(0);
+                sweeper3L.setPower(0);
 
-            if(gamepad1.dpad_up){
-                intake_rotate.setPower(-1);
-            }
-
-            if(gamepad1.dpad_down){
-                intake_rotate.setPower(0);
-            }
-
-            //gamepad2
-            if(gamepad2.b){
-                rotator.setPosition(0);
-            }
-
-            if(gamepad2.dpad_up){
-                //going out
-                linAc1.setPower(1);
-                linAc2.setPower(1);
-            }
-
-            if(gamepad2.dpad_right){
-                //stop
-                linAc1.setPower(0);
-                linAc2.setPower(0);
-            }
-
-            if(gamepad2.dpad_down){
-                //going down
-                linAc1.setPower(-1);
-                linAc2.setPower(-1);
-            }
-
-            if(gamepad2.dpad_left){
-                launchRight.setPower(1);
-                launchLeft.setPower(1);
-            }
-
-            if(gamepad2.left_bumper){
                 launchRight.setPower(0);
                 launchLeft.setPower(0);
             }
 
-        }
+            if(gamepad2.dpad_up){
+                rotator.setPosition(0.3);
+            }
 
+
+            if(gamepad2.dpad_down){
+                rotator.setPosition(0.25);
+            }
+
+        }
 
     }
 }
