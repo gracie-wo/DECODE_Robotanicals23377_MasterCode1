@@ -5,8 +5,11 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorControllerEx;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp(name = "Main", group = "Main")
@@ -54,13 +57,43 @@ public class Main extends LinearOpMode {
 
         Servo rotator = hardwareMap.get(Servo.class, "rotator");
 
+        final double NEWR_P = 0.0;
+        final double NEWR_I = 0.0;
+        final double NEWR_D = 0.0;
+        final double NEWR_F = 0.0;
+
+        DcMotorControllerEx motorControllerExR = (DcMotorControllerEx)launchRight.getController();
+        int motorIndexR = ((DcMotorEx)launchRight).getPortNumber();
+
+        PIDFCoefficients pidfOrigR = motorControllerExR.getPIDFCoefficients(motorIndexR, DcMotor.RunMode.RUN_USING_ENCODER);
+
+        PIDFCoefficients pidfNewR = new PIDFCoefficients(NEWR_P, NEWR_I, NEWR_D, NEWR_F);
+        motorControllerExR.setPIDFCoefficients(motorIndexR, DcMotor.RunMode.RUN_USING_ENCODER, pidfNewR);
+
+        PIDFCoefficients pidfModifiedR = motorControllerExR.getPIDFCoefficients(motorIndexR, DcMotor.RunMode.RUN_USING_ENCODER);
+
+
+
+        final double NEWL_P = 0.0;
+        final double NEWL_I = 0.0;
+        final double NEWL_D = 0.0;
+        final double NEWL_F = 0.0;
+
+        DcMotorControllerEx motorControllerExL = (DcMotorControllerEx)launchLeft.getController();
+        int motorIndexL = ((DcMotorEx)launchLeft).getPortNumber();
+
+        PIDFCoefficients pidfOrigL = motorControllerExL.getPIDFCoefficients(motorIndexL, DcMotor.RunMode.RUN_USING_ENCODER);
+
+        PIDFCoefficients pidfNewL = new PIDFCoefficients(NEWL_P, NEWL_I, NEWL_D, NEWL_F);
+        motorControllerExL.setPIDFCoefficients(motorIndexL, DcMotor.RunMode.RUN_USING_ENCODER, pidfNewL);
+
+        PIDFCoefficients pidfModifiedL = motorControllerExL.getPIDFCoefficients(motorIndexL, DcMotor.RunMode.RUN_USING_ENCODER);
+
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
         waitForStart();
-
-
         if (isStopRequested()) return;
 
         while (opModeIsActive()) {
@@ -99,8 +132,8 @@ public class Main extends LinearOpMode {
 
             frontLeft.setPower(frontLeftPower* 1);
             backLeft.setPower(backLeftPower* 1);
-            frontRight.setPower(frontRightPower* 1);
-            backRight.setPower(backRightPower* 1);
+//            frontRight.setPower(frontRightPower* 1);
+//            backRight.setPower(backRightPower* 1);
 
             //intake on
             if(gamepad1.a){
@@ -131,7 +164,6 @@ public class Main extends LinearOpMode {
             }
 
             //gamepad 2
-            //launch from far away
             if(gamepad2.x){
                 intake.setPower(1);
 
@@ -142,8 +174,13 @@ public class Main extends LinearOpMode {
                 sweeper3R.setPower(-1);
                 sweeper3L.setPower(1);
 
-                launchRight.setPower(0.63);
-                launchLeft.setPower(0.63);
+                //launch from far away
+//                launchRight.setPower(0.63);
+//                launchLeft.setPower(0.63);
+
+                //launch from close
+                launchRight.setPower(0.45);
+                launchLeft.setPower(0.45);
             }
 
             if(gamepad2.b){
@@ -161,12 +198,12 @@ public class Main extends LinearOpMode {
             }
 
             if(gamepad2.dpad_up){
-                rotator.setPosition(0.3);
+                rotator.setPosition(0);
             }
 
 
             if(gamepad2.dpad_down){
-                rotator.setPosition(0.25);
+                rotator.setPosition(0.75);
             }
 
         }

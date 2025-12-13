@@ -160,7 +160,7 @@ public class AutoOutline extends LinearOpMode {
         private CRServo sweeper1R;
 
         public Sweeper1R(HardwareMap hardwareMap){
-            sweeper1R = hardwareMap.get(CRServo.class, "sweeper1R");
+            sweeper1R = hardwareMap.get(CRServo.class, "sweeper1");
         }
 
         public class Sweeper1RIntakeOn implements Action {
@@ -206,7 +206,7 @@ public class AutoOutline extends LinearOpMode {
         private CRServo sweeper1L;
 
         public Sweeper1L(HardwareMap hardwareMap){
-            sweeper1L = hardwareMap.get(CRServo.class, "sweeper1L");
+            sweeper1L = hardwareMap.get(CRServo.class, "sweeper2");
         }
 
         public class Sweeper1LIntakeOn implements Action {
@@ -252,7 +252,7 @@ public class AutoOutline extends LinearOpMode {
         private CRServo sweeper2R;
 
         public Sweeper2R(HardwareMap hardwareMap){
-            sweeper2R = hardwareMap.get(CRServo.class, "sweeper2R");
+            sweeper2R = hardwareMap.get(CRServo.class, "sweeper3");
         }
 
         public class Sweeper2RIntakeOn implements Action {
@@ -298,7 +298,7 @@ public class AutoOutline extends LinearOpMode {
         private CRServo sweeper2L;
 
         public Sweeper2L(HardwareMap hardwareMap){
-            sweeper2L = hardwareMap.get(CRServo.class, "sweeper2L");
+            sweeper2L = hardwareMap.get(CRServo.class, "sweeper4");
         }
 
         public class Sweeper2LIntakeOn implements Action {
@@ -344,7 +344,7 @@ public class AutoOutline extends LinearOpMode {
         private CRServo sweeper3R;
 
         public Sweeper3R(HardwareMap hardwareMap){
-            sweeper3R = hardwareMap.get(CRServo.class, "sweeper3R");
+            sweeper3R = hardwareMap.get(CRServo.class, "sweeper6");
         }
 
         public class Sweeper3RIntakeOn implements Action {
@@ -390,7 +390,7 @@ public class AutoOutline extends LinearOpMode {
         private CRServo sweeper3L;
 
         public Sweeper3L(HardwareMap hardwareMap){
-            sweeper3L = hardwareMap.get(CRServo.class, "sweeper3L");
+            sweeper3L = hardwareMap.get(CRServo.class, "sweeper5");
         }
 
         public class Sweeper3LIntakeOn implements Action {
@@ -487,19 +487,19 @@ public class AutoOutline extends LinearOpMode {
 
 //-------------------------Build Pathways------------------------------------------
         TrajectoryActionBuilder toStart = drive.actionBuilder(initialPose)
-                .strafeToConstantHeading(new Vector2d(0, 0));
-        TrajectoryActionBuilder toNextStep = toStart.fresh()
-                .strafeToLinearHeading(new Vector2d(0, 0), 0);
+                .strafeToConstantHeading(new Vector2d(10, 0));
+//        TrajectoryActionBuilder toNextStep = toStart.fresh()
+//                .strafeToLinearHeading(new Vector2d(0, 0), 0);
 
 //-----------------------During INIT actions-------------------------------------
-        Actions.runBlocking(launchRight.launchRightOnFar());
-        Actions.runBlocking(launchLeft.launchLeftOnFar());
+//        Actions.runBlocking(launchRight.launchRightOnFar());
+//        Actions.runBlocking(launchLeft.launchLeftOnFar());
 
         waitForStart();
 
 //-------------------------Build Actions---------------------------------------------
         Action to_start_action = toStart.build();
-        Action to_next_step_action = toNextStep.build();
+//        Action to_next_step_action = toNextStep.build();
 
 
         if (isStopRequested()) return;
@@ -507,8 +507,8 @@ public class AutoOutline extends LinearOpMode {
 //-------------------------AUTO PATHWAYS---------------------------------------------
         Actions.runBlocking(
             new SequentialAction(
-                    to_start_action,
-                    intake.intakeOn()
+                    to_start_action
+//                    intake.intakeOn()
             )
 
         );
