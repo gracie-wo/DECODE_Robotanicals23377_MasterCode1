@@ -1,6 +1,4 @@
-package org.firstinspires.ftc.teamcode.main;
-
-import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
+package org.firstinspires.ftc.teamcode.main.auto;
 
 import androidx.annotation.NonNull;
 
@@ -9,12 +7,14 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.Rotation2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -26,6 +26,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 
 @Config
+@Disabled
 @Autonomous(name = "AutoOutline", group = "Autonomous")
 public class AutoOutline extends LinearOpMode {
 
@@ -88,8 +89,8 @@ public class AutoOutline extends LinearOpMode {
         public class LaunchRightOnClose implements Action{
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                launchRight.setPower(0.4);
-                return false;
+                launchRight.setPower(0.45);
+                return true;
             }
         }
 
@@ -133,8 +134,8 @@ public class AutoOutline extends LinearOpMode {
         public class LaunchLeftOnClose implements Action{
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                launchLeft.setPower(0.4);
-                return false;
+                launchLeft.setPower(0.45);
+                return true;
             }
         }
 
@@ -454,7 +455,7 @@ public class AutoOutline extends LinearOpMode {
         public class RotatorClose implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet){
-                rotator.setPosition(0.5);
+                rotator.setPosition(0.11);
                 return false;
             }
         }
@@ -486,32 +487,61 @@ public class AutoOutline extends LinearOpMode {
         Rotator rotator = new Rotator(hardwareMap);
 
 //-------------------------Build Pathways------------------------------------------
-        TrajectoryActionBuilder toStart = drive.actionBuilder(initialPose)
-                .strafeToConstantHeading(new Vector2d(10, 0));
-//        TrajectoryActionBuilder toNextStep = toStart.fresh()
-//                .strafeToLinearHeading(new Vector2d(0, 0), 0);
+        TrajectoryActionBuilder launch = drive.actionBuilder(initialPose)
+                //to launch
+                .strafeToConstantHeading (new Vector2d(60, 0))
+                .turnTo(-Math.toRadians(45))
+                .stopAndAdd(rotator.rotatorClose()).
+                stopAndAdd(
+                        new ParallelAction(
+                                rotator.rotatorClose(),
+                                launchLeft.launchLeftOnClose(),
+                                launchRight.launchRightOnClose()
+                        )
+                );
+                sleep(200);
+        TrajectoryActionBuilder turn1 = launch.fresh()
+                .turn(Math.toRadians(-45))
+                ;
+
+//                .turn(Math.toRadians(-90));
+//        TrajectoryActionBuilder line2 = line1.fresh()
+//                .lineToX(20);
+////                .lineToY(40)
+////                .turnTo(90);
+//        TrajectoryActionBuilder line3 = line2.fresh()
+//                .strafeToLinearHeading(new Vector2d(30, 60), 90);
 
 //-----------------------During INIT actions-------------------------------------
-//        Actions.runBlocking(launchRight.launchRightOnFar());
-//        Actions.runBlocking(launchLeft.launchLeftOnFar());
-
-        waitForStart();
+        Actions.runBlocking(rotator.rotatorClose());
+        Actions.runBlocking(rotator.rotatorClose());
 
 //-------------------------Build Actions---------------------------------------------
-        Action to_start_action = toStart.build();
-//        Action to_next_step_action = toNextStep.build();
+        Action launchA = launch.build();
+        Action turning = turn1.build();
+//        Action line2A = line2.build();
+//        Action line3A = line3.build();
 
+        waitForStart();
 
         if (isStopRequested()) return;
 
 //-------------------------AUTO PATHWAYS---------------------------------------------
         Actions.runBlocking(
-            new SequentialAction(
-                    to_start_action
-//                    intake.intakeOn()
-            )
-
+                new SequentialAction(
+                        launchA
+//                        new ParallelAction(
+//                                launchLeft.launchLeftOnClose(),
+//                                launchRight.launchRightOnClose()
+//                        ),
+//                        new SleepAction(1.0),
+//                        new ParallelAction(
+//                                launchLeft.launchLeftOff(),
+//                                launchRight.launchRightOff()
+//                        )
+                )
         );
+
     }
 
 }

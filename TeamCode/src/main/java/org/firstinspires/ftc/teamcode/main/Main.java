@@ -48,6 +48,8 @@ public class Main extends LinearOpMode {
         CRServo sweeper3L = hardwareMap.get(CRServo.class, "sweeper5");
         CRServo sweeper3R = hardwareMap.get(CRServo.class, "sweeper6");
 
+        double rotPos = 0.0;
+
 
         DcMotor launchRight = hardwareMap.dcMotor.get("launchRight");
         DcMotor launchLeft = hardwareMap.dcMotor.get("launchLeft");
@@ -132,8 +134,8 @@ public class Main extends LinearOpMode {
 
             frontLeft.setPower(frontLeftPower* 1);
             backLeft.setPower(backLeftPower* 1);
-//            frontRight.setPower(frontRightPower* 1);
-//            backRight.setPower(backRightPower* 1);
+            frontRight.setPower(frontRightPower* 1);
+            backRight.setPower(backRightPower* 1);
 
             //intake on
             if(gamepad1.a){
@@ -203,7 +205,29 @@ public class Main extends LinearOpMode {
 
 
             if(gamepad2.dpad_down){
-                rotator.setPosition(0.75);
+                rotator.setPosition(0.99);
+            }
+
+            if(gamepad2.dpad_left){
+                if(rotPos > 0.0){
+                    rotPos -= 0.001;
+                    rotator.setPosition(rotPos);
+                }
+
+                telemetry.addData("Servo Position", rotator.getPosition());
+                telemetry.update();
+            }
+
+
+            if (gamepad2.dpad_right) {
+                if(rotPos < 0.99){
+                    rotPos += 0.001;
+                    rotator.setPosition(rotPos);
+                }
+
+                telemetry.addData("Servo Position", rotator.getPosition());
+                telemetry.update();
+
             }
 
         }
