@@ -13,6 +13,8 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
+import org.firstinspires.ftc.teamcode.GoBildaPinpointDriver;
+
 @Disabled
 @TeleOp(name = "Main", group = "Main")
 public class OLD_main_file extends LinearOpMode {
