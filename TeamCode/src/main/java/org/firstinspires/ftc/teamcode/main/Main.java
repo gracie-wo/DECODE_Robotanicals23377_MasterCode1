@@ -91,6 +91,9 @@ public class Main extends LinearOpMode {
 
         PIDFCoefficients pidfModifiedL = motorControllerExL.getPIDFCoefficients(motorIndexL, DcMotor.RunMode.RUN_USING_ENCODER);
 
+        GoBildaPinpointDriver odo = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+        odo.setOffsets(44, 60.2);
+
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
