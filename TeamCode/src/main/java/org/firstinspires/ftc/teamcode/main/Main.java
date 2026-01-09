@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.main;
 
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -11,6 +13,10 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
 @TeleOp(name = "Main", group = "Main")
 public class Main extends LinearOpMode {
@@ -22,9 +28,6 @@ public class Main extends LinearOpMode {
         DcMotor frontRight = hardwareMap.dcMotor.get("frontRight");
         DcMotor backRight = hardwareMap.dcMotor.get("backRight");
 
-        DcMotor intake = hardwareMap.dcMotor.get("intake");
-        intake.setDirection(DcMotorSimple.Direction.REVERSE);
-
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
@@ -32,6 +35,7 @@ public class Main extends LinearOpMode {
 
         frontRight.setDirection(DcMotorSimple.Direction.REVERSE);
         backRight.setDirection(DcMotorSimple.Direction.REVERSE);
+
 
         IMU imu = hardwareMap.get(IMU.class, "imu");
         // Adjust the orientation parameters to match your robot
@@ -41,58 +45,53 @@ public class Main extends LinearOpMode {
         // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
         imu.initialize(parameters);
 
-        CRServo sweeper1R = hardwareMap.get(CRServo.class, "sweeper1");
-        CRServo sweeper1L = hardwareMap.get(CRServo.class, "sweeper2");
-        CRServo sweeper2R = hardwareMap.get(CRServo.class, "sweeper3");
-        CRServo sweeper2L = hardwareMap.get(CRServo.class, "sweeper4");
-        CRServo sweeper3L = hardwareMap.get(CRServo.class, "sweeper5");
-        CRServo sweeper3R = hardwareMap.get(CRServo.class, "sweeper6");
+        VoltageSensor controlHubVoltageSensor;
+        controlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
+        double voltChange = voltSpeed(controlHubVoltageSensor);
 
-        double rotPos = 0.0;
-
-
-        DcMotor launchRight = hardwareMap.dcMotor.get("launchRight");
-        DcMotor launchLeft = hardwareMap.dcMotor.get("launchLeft");
-        launchRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        launchLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        launchRight.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        Servo rotator = hardwareMap.get(Servo.class, "rotator");
-
-        final double NEWR_P = 0.0;
-        final double NEWR_I = 0.0;
-        final double NEWR_D = 0.0;
-        final double NEWR_F = 0.0;
-
-        DcMotorControllerEx motorControllerExR = (DcMotorControllerEx)launchRight.getController();
-        int motorIndexR = ((DcMotorEx)launchRight).getPortNumber();
-
-        PIDFCoefficients pidfOrigR = motorControllerExR.getPIDFCoefficients(motorIndexR, DcMotor.RunMode.RUN_USING_ENCODER);
-
-        PIDFCoefficients pidfNewR = new PIDFCoefficients(NEWR_P, NEWR_I, NEWR_D, NEWR_F);
-        motorControllerExR.setPIDFCoefficients(motorIndexR, DcMotor.RunMode.RUN_USING_ENCODER, pidfNewR);
-
-        PIDFCoefficients pidfModifiedR = motorControllerExR.getPIDFCoefficients(motorIndexR, DcMotor.RunMode.RUN_USING_ENCODER);
-
-
-
-        final double NEWL_P = 0.0;
-        final double NEWL_I = 0.0;
-        final double NEWL_D = 0.0;
-        final double NEWL_F = 0.0;
-
-        DcMotorControllerEx motorControllerExL = (DcMotorControllerEx)launchLeft.getController();
-        int motorIndexL = ((DcMotorEx)launchLeft).getPortNumber();
-
-        PIDFCoefficients pidfOrigL = motorControllerExL.getPIDFCoefficients(motorIndexL, DcMotor.RunMode.RUN_USING_ENCODER);
-
-        PIDFCoefficients pidfNewL = new PIDFCoefficients(NEWL_P, NEWL_I, NEWL_D, NEWL_F);
-        motorControllerExL.setPIDFCoefficients(motorIndexL, DcMotor.RunMode.RUN_USING_ENCODER, pidfNewL);
-
-        PIDFCoefficients pidfModifiedL = motorControllerExL.getPIDFCoefficients(motorIndexL, DcMotor.RunMode.RUN_USING_ENCODER);
 
         GoBildaPinpointDriver odo = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+//OFFSETS NEED TO BE CHANGED
         odo.setOffsets(44, 60.2);
+
+
+        DcMotor intake = hardwareMap.dcMotor.get("intake");
+
+        Servo kicker_rotate = hardwareMap.get(Servo.class, "kicker1");
+        CRServo kicker_continuous = hardwareMap.get(CRServo.class, "kicker2");
+        Servo spindex = hardwareMap.get(Servo.class, "spindex");
+        Servo rotator = hardwareMap.get(Servo.class, "rotator");
+
+        DcMotor launcher = hardwareMap.dcMotor.get("launcher");
+        launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+
+        Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight.pipelineSwitch(1);
+        LLResult llResult = limelight.getLatestResult();
+        limelight.start();
+
+        //rotator positions
+        boolean camera_on = false;
+        //basically center = 0.8
+        //range rn: 0.25 - 1
+        double launchPosition = 0.8;
+
+        //intake and launch kicker
+        boolean in_position = false;
+        int ready = 0;
+        boolean launchOn = false;
+        int rotate_state = 0;
+        int current_state = 0;
+        int kicker_start = 0;
+        ElapsedTime timer = new ElapsedTime();
+
+        //intake
+        int intake_position = 0;
+        boolean spinToLaunch = false;
+
+        //launching
+        boolean launchDistanceChange = false;
 
 
         telemetry.addData("Status", "Initialized");
@@ -102,6 +101,23 @@ public class Main extends LinearOpMode {
         if (isStopRequested()) return;
 
         while (opModeIsActive()) {
+            //limelight
+            llResult = limelight.getLatestResult();
+
+            //run kicker quickly
+            if(kicker_start == 0){
+                timer.reset();
+                kicker_continuous.setPower(0.1);
+                kicker_rotate.setPosition(0.3);
+                kicker_start = 1;
+            }
+
+            if(kicker_start == 1 && timer.time() > 0.1){
+                kicker_continuous.setPower(0);
+                kicker_start = 2;
+            }
+
+
             double y = gamepad1.left_stick_y; // Remember, Y stick value is reversed
             double x = -gamepad1.left_stick_x;
             double rx = -gamepad1.right_stick_x;
@@ -140,100 +156,200 @@ public class Main extends LinearOpMode {
             frontRight.setPower(frontRightPower* 1);
             backRight.setPower(backRightPower* 1);
 
-            //intake on
-            if(gamepad1.a){
-                intake.setPower(1);
 
-                sweeper1R.setPower(-0.45);
-                sweeper1L.setPower(0.45);
-
-                sweeper2R.setPower(-0.1);
-                sweeper2L.setPower(0.1);
-
-                sweeper3R.setPower(0.5);
-                sweeper3L.setPower(-0.5);
-            }
-
-            //intake off
+            //gamepad1
+            //intake
             if(gamepad1.y){
-                intake.setPower(0);
-
-                sweeper1R.setPower(0);
-                sweeper1L.setPower(0);
-
-                sweeper2R.setPower(0);
-                sweeper2L.setPower(0);
-
-                sweeper3R.setPower(0);
-                sweeper3L.setPower(0);
-            }
-
-            //gamepad 2
-            if(gamepad2.x){
+                in_position = false;
                 intake.setPower(1);
-
-                sweeper1R.setPower(-1);
-                sweeper1L.setPower(1);
-                sweeper2R.setPower(-1);
-                sweeper2L.setPower(1);
-                sweeper3R.setPower(-1);
-                sweeper3L.setPower(1);
-
-                //launch from far away
-//                launchRight.setPower(0.63);
-//                launchLeft.setPower(0.63);
-
-                //launch from close
-                launchRight.setPower(0.45);
-                launchLeft.setPower(0.45);
             }
 
-            if(gamepad2.b){
+            if(gamepad1.dpad_up){
+                in_position = false;
+                spindex.setPosition(0.085);
+            }
+
+            if(gamepad1.dpad_right){
+                in_position = false;
+                spindex.setPosition(0.5);
+            }
+
+            if(gamepad1.dpad_down){
+                in_position = false;
+                spindex.setPosition(0.94);
+            }
+
+            if(gamepad1.dpad_left){
+                spindex.setPosition(0);
+                in_position = true;
+            }
+
+            if(gamepad1.x){
+                in_position = false;
                 intake.setPower(0);
-
-                sweeper1R.setPower(0);
-                sweeper1L.setPower(0);
-                sweeper2R.setPower(0);
-                sweeper2L.setPower(0);
-                sweeper3R.setPower(0);
-                sweeper3L.setPower(0);
-
-                launchRight.setPower(0);
-                launchLeft.setPower(0);
             }
 
+            //turn camera on/off
+            if(gamepad1.right_bumper){
+                in_position = false;
+                rotator.setPosition(launchPosition);
+                camera_on = true;
+            }
+
+            if (camera_on && llResult != null && llResult.isValid()){
+                Pose3D botPose = llResult.getBotpose_MT2();
+                telemetry.addData("Distance", getDistanceFromTags(llResult.getTa()));
+                telemetry.addData("Tx" , llResult.getTx());
+                telemetry.addData("Ty", llResult.getTy());
+                telemetry.addData("Ta", llResult.getTa());
+                telemetry.addData("BotPose", botPose.toString());
+//            telemetry.addData("Yaw", botPose.getOrientation().getYaw());
+                telemetry.update();
+            }
+
+            if(gamepad1.left_bumper){
+                in_position = false;
+                camera_on = false;
+                telemetry.clear();
+                telemetry.addData("Camera:", "Off");
+                telemetry.update();
+            }
+
+
+            if(camera_on && llResult.getTx() < -1){
+                if(launchPosition > 0.25){
+                    launchPosition -= 0.0001;
+                    rotator.setPosition(launchPosition);
+                }
+            }
+
+            if(camera_on && llResult.getTx() > 1){
+                if(launchPosition < 1){
+                    launchPosition += 0.0001;
+                    rotator.setPosition(launchPosition);
+                }
+            }
+
+            //gamepad2
+            //kicker up to spindex (automatic)
+            if(gamepad2.b) {
+//NOTE TO SELF: WHEN CODING INTAKE SPINDEX PLEASE SET IN_POSITION TO TRUE WHEN IT SPINS TO LUANCH POSITION AT THE END
+//PLEASE DON"T FORGET PLEASE PLEASE
+                if(!in_position){
+                    spindex.setPosition(0.05);
+                    ready = 1;
+                    timer.reset();
+                } else {
+                    launchOn = true;
+                    in_position = launch(spindex, launchOn, timer, kicker_continuous, kicker_rotate, rotate_state, current_state);
+                }
+            }
+
+            if(ready == 1 && timer.time() > 0.6){
+                ready = 0;
+                in_position = true;
+                launchOn = true;
+                in_position = launch(spindex, launchOn, timer, kicker_continuous, kicker_rotate, rotate_state, current_state);
+
+            }
+
+            //power launch motor
             if(gamepad2.dpad_up){
-                rotator.setPosition(0);
-            }
-
-
-            if(gamepad2.dpad_down){
-                rotator.setPosition(0.99);
+                launchDistanceChange = true;
+                in_position = false;
+                launcher.setPower(0.75);
             }
 
             if(gamepad2.dpad_left){
-                if(rotPos > 0.0){
-                    rotPos -= 0.001;
-                    rotator.setPosition(rotPos);
-                }
-
-                telemetry.addData("Servo Position", rotator.getPosition());
-                telemetry.update();
+                in_position = false;
+                launchDistanceChange = false;
+                launcher.setPower(0);
             }
 
-
-            if (gamepad2.dpad_right) {
-                if(rotPos < 0.99){
-                    rotPos += 0.001;
-                    rotator.setPosition(rotPos);
-                }
-
-                telemetry.addData("Servo Position", rotator.getPosition());
-                telemetry.update();
-
+            if(launchDistanceChange && llResult != null && llResult.isValid()){
+                double distance = getDistanceFromTags(llResult.getTa());
+                double launchPower = (0.0025 * distance) + voltChange;
+                launcher.setPower(launchPower);
             }
 
         }
 
+    }
+
+    public double getDistanceFromTags(double ta){
+        //CHANGE SCALE NUM (CALCULATE)
+
+        double scale = 29280.39;
+        double distance = Math.sqrt(scale/ta);
+        return distance;
+    }
+
+    public boolean launch(Servo spindex, boolean launchOn, ElapsedTime timer, CRServo kicker_continuous, Servo kicker_rotate, int rotate_state, int current_state){
+        boolean end_state = false;
+        int wait_time = 0;
+
+        spindex.setPosition(0);
+        kicker_continuous.setPower(1);
+        timer.reset();
+        kicker_rotate.setPosition(0.6);
+        rotate_state = 1;
+
+        while(launchOn) {
+            if (rotate_state == 1 && (timer.time() > 0.5)) {
+                kicker_rotate.setPosition(0.3);
+                current_state++;
+                rotate_state = 0;
+                timer.reset();
+
+                if(end_state){
+                    kicker_continuous.setPower(0);
+                    launchOn = false;
+                }
+            }
+
+            if(current_state == 1 && timer.time() > 0.3){
+                spindex.setPosition(0.43);
+                timer.reset();
+                current_state++;
+                wait_time = 1;
+            }
+
+            if(current_state == 3 && timer.time() > 0.3){
+                wait_time = 1;
+                spindex.setPosition(0.87);
+                current_state++;
+                end_state = true;
+                timer.reset();
+            }
+
+            if(wait_time == 1 && timer.time() > 0.4){
+                kicker_rotate.setPosition(0.6);
+                rotate_state = 1;
+                wait_time = 0;
+                timer.reset();
+            }
+        }
+
+        return false;
+    }
+
+    public double voltSpeed(VoltageSensor controlHubVoltageSensor){
+        double voltage = controlHubVoltageSensor.getVoltage();
+
+        if(voltage >= 13.1){
+            return 0.05;
+        } else if (voltage >= 12.6){
+            return 0.1;
+        } else if (voltage >= 12.1){
+            return 0.125;
+        } else if (voltage >= 11.6){
+            return 0.15;
+        } else if (voltage >= 11.1){
+            return 0.175;
+        } else if (voltage >= 10.6){
+            return 0.2;
+        } else {
+            return 0.225;
+        }
     }
 }
