@@ -257,7 +257,6 @@ public class Main extends LinearOpMode {
             if(gamepad2.dpad_up){
                 launchDistanceChange = true;
                 in_position = false;
-                launcher.setPower(0.75);
             }
 
             if(gamepad2.dpad_left){
