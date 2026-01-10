@@ -369,7 +369,7 @@ public class BlueFront extends LinearOpMode {
         }
 
         //instantiate at (0,0)
-        Pose2d initialPose = new Pose2d(0, 0, Math.toRadians(0));
+        Pose2d initialPose = new Pose2d(0, 0, Math.toRadians(50));
 
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
@@ -384,7 +384,22 @@ public class BlueFront extends LinearOpMode {
 
         //launch
         TrajectoryActionBuilder launch1 = drive.actionBuilder(initialPose)
-                .strafeToConstantHeading (new Vector2d(-24, 0));
+                .strafeToLinearHeading (new Vector2d(-55, 0), Math.toRadians(45));
+
+
+        TrajectoryActionBuilder intake1 = launch1.fresh()
+                .strafeToLinearHeading (new Vector2d(-9, 22), Math.toRadians(90))
+                .strafeToConstantHeading(new Vector2d(-9, 13));
+
+        TrajectoryActionBuilder launch2 = intake1.fresh()
+                .strafeToLinearHeading (new Vector2d(-55, 0), Math.toRadians(45));
+
+        TrajectoryActionBuilder intake2 = launch2.fresh()
+                .strafeToLinearHeading (new Vector2d(-33, 22), Math.toRadians(90))
+                .strafeToConstantHeading(new Vector2d(-33, 13));
+
+        TrajectoryActionBuilder launch3 = intake2.fresh()
+                .strafeToLinearHeading (new Vector2d(-55, 0), Math.toRadians(45));
 
         //init things
         Actions.runBlocking(spindex.spindexLaunchOne());
@@ -393,6 +408,9 @@ public class BlueFront extends LinearOpMode {
 
 
         Action launch1A = launch1.build();
+        Action intake1A = intake1.build();
+        Action launch2A = launch2.build();
+        Action intake2A = intake2.build();
 
         waitForStart();
         if (isStopRequested()) return;
@@ -401,6 +419,13 @@ public class BlueFront extends LinearOpMode {
         // ------------------------- RUN AUTO -------------------------
         Actions.runBlocking(
                 new SequentialAction(
+                        new ParallelAction(
+                                launch1A
+                                //warm up launch
+                        ),
+
+                        new SleepAction(330)
+                        //launch methods
 
                 )
         );

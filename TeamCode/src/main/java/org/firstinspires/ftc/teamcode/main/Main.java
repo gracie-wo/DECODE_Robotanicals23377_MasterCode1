@@ -189,6 +189,10 @@ public class Main extends LinearOpMode {
                 intake.setPower(0);
             }
 
+            if(gamepad2.a){
+                spindex.setPosition(1);
+            }
+
             //turn camera on/off
             if(gamepad1.right_bumper){
                 in_position = false;
