@@ -8,6 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+@Disabled
 @TeleOp(name = "2 motor (1 encoded) and 1 servo", group = "Testing")
 public class TESTING_intake extends LinearOpMode {
     @Override

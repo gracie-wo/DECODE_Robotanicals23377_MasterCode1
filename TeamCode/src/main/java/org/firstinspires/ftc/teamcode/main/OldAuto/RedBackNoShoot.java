@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.main.auto;
+package org.firstinspires.ftc.teamcode.main.OldAuto;
 
 import androidx.annotation.NonNull;
 
@@ -22,6 +22,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 
 @Config
+@Disabled
 @Autonomous(name = "AutoRedBackNoShoot", group = "Autonomous")
 public class RedBackNoShoot extends LinearOpMode {
 

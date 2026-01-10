@@ -1,9 +1,11 @@
 package org.firstinspires.ftc.teamcode.main;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 
+@Disabled
 @TeleOp(name = "2 servos kicker", group = "Testing")
 public class TESTING_kicker extends LinearOpMode {
     @Override

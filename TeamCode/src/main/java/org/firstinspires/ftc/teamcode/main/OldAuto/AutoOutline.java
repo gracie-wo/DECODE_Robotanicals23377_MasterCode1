@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.main.auto;
+package org.firstinspires.ftc.teamcode.main.OldAuto;
 
 import androidx.annotation.NonNull;
 
@@ -7,31 +7,28 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.Rotation2d;
 import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.SleepAction;
 import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
-import com.acmerobotics.roadrunner.TranslationalVelConstraint;
 import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorControllerEx;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 
 @Config
-@Autonomous(name = "AutoRedFrontShoot", group = "Autonomous")
-public class RedFrontShoot extends LinearOpMode {
+@Disabled
+@Autonomous(name = "AutoOutline", group = "Autonomous")
+public class AutoOutline extends LinearOpMode {
 
-    //------------------------------------MOTORS--------------------------------------------
+//------------------------------------MOTORS--------------------------------------------
     public class Intake {
         private DcMotorEx intake;
 
@@ -41,19 +38,7 @@ public class RedFrontShoot extends LinearOpMode {
             intake.setDirection(DcMotorSimple.Direction.REVERSE);
         }
 
-        public class IntakeOnSlow implements Action{
-            @Override
-            public boolean run(@NonNull TelemetryPacket packet) {
-                intake.setPower(0.55);
-                return false;
-            }
-        }
-
-        public Action intakeOnSlow() {
-            return new IntakeOnSlow();
-        }
-
-        public class IntakeOnFast implements Action{
+        public class IntakeOn implements Action{
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 intake.setPower(1);
@@ -61,8 +46,8 @@ public class RedFrontShoot extends LinearOpMode {
             }
         }
 
-        public Action intakeOnFast() {
-            return new IntakeOnFast();
+        public Action intakeOn() {
+            return new IntakeOn();
         }
 
         public class IntakeOff implements Action{
@@ -81,30 +66,16 @@ public class RedFrontShoot extends LinearOpMode {
     public class LaunchRight {
         private DcMotorEx launchRight;
 
-        final double NEWR_P = 5.0;
-        final double NEWR_I = 0.2;
-        final double NEWR_D = 0.7;
-        final double NEWR_F = 11;
-
-//        DcMotorControllerEx motorControllerExR = (DcMotorControllerEx)launchRight.getController();
-//        int motorIndexR = ((DcMotorEx)launchRight).getPortNumber();
-//
-//        PIDFCoefficients pidfOrigR = motorControllerExR.getPIDFCoefficients(motorIndexR, DcMotor.RunMode.RUN_USING_ENCODER);
-
-
-
         public LaunchRight(HardwareMap hardwareMap){
             launchRight = hardwareMap.get(DcMotorEx.class, "launchRight");
             launchRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             launchRight.setDirection(DcMotorSimple.Direction.REVERSE);
-            PIDFCoefficients pidfNewR = new PIDFCoefficients(NEWR_P, NEWR_I, NEWR_D, NEWR_F);
-            launchRight.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfNewR);
         }
 
         public class LaunchRightOnFar implements Action{
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                launchRight.setPower(0.46);
+                launchRight.setPower(0.63);
                 return false;
             }
         }
@@ -116,8 +87,8 @@ public class RedFrontShoot extends LinearOpMode {
         public class LaunchRightOnClose implements Action{
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                launchRight.setPower(0.42);
-                return false;
+                launchRight.setPower(0.45);
+                return true;
             }
         }
 
@@ -141,21 +112,15 @@ public class RedFrontShoot extends LinearOpMode {
     public class LaunchLeft {
         private DcMotorEx launchLeft;
 
-        final double NEWL_P = 5.0;
-        final double NEWL_I = 0.2;
-        final double NEWL_D = 0.7;
-        final double NEWL_F = 11.0;
         public LaunchLeft(HardwareMap hardwareMap){
             launchLeft = hardwareMap.get(DcMotorEx.class, "launchLeft");
             launchLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-            PIDFCoefficients pidfNewL = new PIDFCoefficients(NEWL_P, NEWL_I, NEWL_D, NEWL_F);
-            launchLeft.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfNewL);
         }
 
         public class LaunchLeftOnFar implements Action{
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                launchLeft.setPower(0.46);
+                launchLeft.setPower(0.63);
                 return false;
             }
         }
@@ -167,8 +132,8 @@ public class RedFrontShoot extends LinearOpMode {
         public class LaunchLeftOnClose implements Action{
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                launchLeft.setPower(0.42);
-                return false;
+                launchLeft.setPower(0.45);
+                return true;
             }
         }
 
@@ -189,7 +154,7 @@ public class RedFrontShoot extends LinearOpMode {
         }
     }
 
-    //----------------------------SERVOS---------------------------------------------------
+//----------------------------SERVOS---------------------------------------------------
     public class Sweeper1R {
         private CRServo sweeper1R;
 
@@ -200,7 +165,7 @@ public class RedFrontShoot extends LinearOpMode {
         public class Sweeper1RIntakeOn implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet){
-                sweeper1R.setPower(-0.8);
+                sweeper1R.setPower(-0.45);
                 return false;
             }
         }
@@ -246,7 +211,7 @@ public class RedFrontShoot extends LinearOpMode {
         public class Sweeper1LIntakeOn implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet){
-                sweeper1L.setPower(0.8);
+                sweeper1L.setPower(0.45);
                 return false;
             }
         }
@@ -292,7 +257,7 @@ public class RedFrontShoot extends LinearOpMode {
         public class Sweeper2RIntakeOn implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet){
-                sweeper2R.setPower(-0.8);
+                sweeper2R.setPower(-0.1);
                 return false;
             }
         }
@@ -338,7 +303,7 @@ public class RedFrontShoot extends LinearOpMode {
         public class Sweeper2LIntakeOn implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet){
-                sweeper2L.setPower(0.8);
+                sweeper2L.setPower(0.1);
                 return false;
             }
         }
@@ -384,7 +349,7 @@ public class RedFrontShoot extends LinearOpMode {
         public class Sweeper3RIntakeOn implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet){
-                sweeper3R.setPower(1);
+                sweeper3R.setPower(0.5);
                 return false;
             }
         }
@@ -430,7 +395,7 @@ public class RedFrontShoot extends LinearOpMode {
         public class Sweeper3LIntakeOn implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet){
-                sweeper3L.setPower(-1);
+                sweeper3L.setPower(-0.5);
                 return false;
             }
         }
@@ -503,9 +468,9 @@ public class RedFrontShoot extends LinearOpMode {
 
         //instantiate at (0,0)
         Pose2d initialPose = new Pose2d(0, 0, Math.toRadians(0));
-        //Pose2d launchPose = new Pose2d(25, 0, Math.toRadians(180));
 
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
+
         Intake intake = new Intake(hardwareMap);
         LaunchRight launchRight = new LaunchRight(hardwareMap);
         LaunchLeft launchLeft = new LaunchLeft(hardwareMap);
@@ -519,104 +484,62 @@ public class RedFrontShoot extends LinearOpMode {
 
         Rotator rotator = new Rotator(hardwareMap);
 
-        //launch
-        TrajectoryActionBuilder launch1 = drive.actionBuilder(initialPose)
-                .strafeToConstantHeading (new Vector2d(-24, 0));
+//-------------------------Build Pathways------------------------------------------
+        TrajectoryActionBuilder launch = drive.actionBuilder(initialPose)
+                //to launch
+                .strafeToConstantHeading (new Vector2d(60, 0))
+                .turnTo(-Math.toRadians(45))
+                .stopAndAdd(rotator.rotatorClose()).
+                stopAndAdd(
+                        new ParallelAction(
+                                rotator.rotatorClose(),
+                                launchLeft.launchLeftOnClose(),
+                                launchRight.launchRightOnClose()
+                        )
+                );
+                sleep(200);
+        TrajectoryActionBuilder turn1 = launch.fresh()
+                .turn(Math.toRadians(-45))
+                ;
 
-        //line 1
-        TrajectoryActionBuilder intake1 = launch1.fresh()
-                .strafeToConstantHeading(new Vector2d(-25, 10))
-                .turnTo(Math.toRadians(135));
+//                .turn(Math.toRadians(-90));
+//        TrajectoryActionBuilder line2 = line1.fresh()
+//                .lineToX(20);
+////                .lineToY(40)
+////                .turnTo(90);
+//        TrajectoryActionBuilder line3 = line2.fresh()
+//                .strafeToLinearHeading(new Vector2d(30, 60), 90);
 
-        TrajectoryActionBuilder intakeForward = intake1.fresh()
-                .strafeToConstantHeading(new Vector2d(-6,0),
-                new TranslationalVelConstraint(3.0));
-
-        TrajectoryActionBuilder goToLaunch = intakeForward.fresh()
-                .strafeToConstantHeading(new Vector2d(-30,5))
-                .turnTo(-Math.toRadians(0));
-
-        TrajectoryActionBuilder turning = goToLaunch.fresh()
-                .turnTo(-Math.toRadians(25));
-
-        //init things
+//-----------------------During INIT actions-------------------------------------
+        Actions.runBlocking(rotator.rotatorClose());
         Actions.runBlocking(rotator.rotatorClose());
 
-
-        Action launch1A = launch1.build();
-        Action intake1A = intake1.build();
-        Action intake1B = intakeForward.build();
-        Action goLaunch = goToLaunch.build();
-        Action turn = turning.build();
+//-------------------------Build Actions---------------------------------------------
+        Action launchA = launch.build();
+        Action turning = turn1.build();
+//        Action line2A = line2.build();
+//        Action line3A = line3.build();
 
         waitForStart();
+
         if (isStopRequested()) return;
 
-
-        // ------------------------- RUN AUTO -------------------------
+//-------------------------AUTO PATHWAYS---------------------------------------------
         Actions.runBlocking(
                 new SequentialAction(
-                        launch1A,
-                        new ParallelAction(
-                                intake.intakeOnFast(),
-                                launchLeft.launchLeftOnClose(),
-                                launchRight.launchRightOnClose(),
-                                sweeper3R.sweeper3RLaunchOn(),
-                                sweeper3L.sweeper3LLaunchOn(),
-                                sweeper2R.sweeper2RLaunchOn(),
-                                sweeper2L.sweeper2LLaunchOn(),
-                                sweeper1R.sweeper1RLaunchOn(),
-                                sweeper1L.sweeper1LLaunchOn(),
-                                new SleepAction(5)
-                        ),
-                        new ParallelAction(
-                                intake.intakeOff(),
-                                launchLeft.launchLeftOff(),
-                                launchRight.launchRightOff(),
-                                sweeper1R.sweeper1ROff(),
-                                sweeper1L.sweeper1LOff(),
-                                sweeper2R.sweeper2ROff(),
-                                sweeper2L.sweeper2LOff(),
-                                sweeper3R.sweeper3ROff(),
-                                sweeper3L.sweeper3LOff()
-                        ),
-                        intake1A,
-                        new ParallelAction(
-                                intake.intakeOnFast(),
-                                sweeper1R.sweeper1RIntakeOn(),
-                                sweeper1L.sweeper1LIntakeOn(),
-                                sweeper2R.sweeper2RIntakeOn(),
-                                sweeper2L.sweeper2LIntakeOn(),
-                                sweeper3R.sweeper3RIntakeOn(),
-                                sweeper3L.sweeper3LIntakeOn()
-                        ),
-                        intake1B,
-                        new ParallelAction(
-                                intake.intakeOff(),
-                                sweeper1R.sweeper1ROff(),
-                                sweeper1L.sweeper1LOff(),
-                                sweeper2R.sweeper2ROff(),
-                                sweeper2L.sweeper2LOff(),
-                                sweeper3R.sweeper3ROff(),
-                                sweeper3L.sweeper3LOff()
-                        ),
-                        goLaunch,
-                        turn,
-                        new ParallelAction(
-                                intake.intakeOnFast(),
-                                rotator.rotatorClose(),
-                                launchLeft.launchLeftOnFar(),
-                                launchRight.launchRightOnFar(),
-                                sweeper3R.sweeper3RLaunchOn(),
-                                sweeper3L.sweeper3LLaunchOn(),
-                                sweeper2R.sweeper2RLaunchOn(),
-                                sweeper2L.sweeper2LLaunchOn(),
-                                sweeper1R.sweeper1RLaunchOn(),
-                                sweeper1L.sweeper1LLaunchOn(),
-                                new SleepAction(5)
-                        )
+                        launchA
+//                        new ParallelAction(
+//                                launchLeft.launchLeftOnClose(),
+//                                launchRight.launchRightOnClose()
+//                        ),
+//                        new SleepAction(1.0),
+//                        new ParallelAction(
+//                                launchLeft.launchLeftOff(),
+//                                launchRight.launchRightOff()
+//                        )
                 )
         );
 
     }
+
 }

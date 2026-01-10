@@ -255,11 +255,14 @@ public class Main extends LinearOpMode {
 
             //power launch motor
             if(gamepad2.dpad_up){
-                launchDistanceChange = true;
                 in_position = false;
+                launchDistanceChange = true;
+                //may need to delete
+                voltChange = voltSpeed(controlHubVoltageSensor);
+
             }
 
-            if(gamepad2.dpad_left){
+            if(gamepad2.dpad_down){
                 in_position = false;
                 launchDistanceChange = false;
                 launcher.setPower(0);
