@@ -17,7 +17,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 
-@Disabled
+//@Disabled
 @Autonomous(name="limelight", group="Testing")
 public class TESTING_AprilTagLimelight extends OpMode {
    private Limelight3A limelight;

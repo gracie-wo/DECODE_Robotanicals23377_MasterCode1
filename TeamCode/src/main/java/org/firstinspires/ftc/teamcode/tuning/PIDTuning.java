@@ -3,15 +3,18 @@ package org.firstinspires.ftc.teamcode.tuning;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.acmerobotics.dashboard.config.Config;
 
+
 @Config
-@Autonomous(name = "PID Test")
+@Autonomous(name = "PID Test", group = "RoadRunner")
 public class PIDTuning extends LinearOpMode{
     DcMotorEx flywheel;
 

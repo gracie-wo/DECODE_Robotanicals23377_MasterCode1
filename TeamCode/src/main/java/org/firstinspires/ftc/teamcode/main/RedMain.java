@@ -3,7 +3,6 @@ package org.firstinspires.ftc.teamcode.main;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -12,21 +11,25 @@ import com.qualcomm.robotcore.hardware.DcMotorControllerEx;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
+import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.GoBildaPinpointDriver;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
-@Disabled
-@TeleOp(name = "Main", group = "Main")
-public class Main extends LinearOpMode {
+@TeleOp(name = "Red Main", group = "Main")
+public class RedMain extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
+        NormalizedColorSensor sensor = hardwareMap.get(NormalizedColorSensor.class, "colorSensor");
+        double hue = 0.0;
 
         DcMotor frontLeft = hardwareMap.dcMotor.get("frontLeft");
         DcMotor backLeft = hardwareMap.dcMotor.get("backLeft");
@@ -87,7 +90,7 @@ public class Main extends LinearOpMode {
 
 
         Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight.pipelineSwitch(1);
+        limelight.pipelineSwitch(2);
         LLResult llResult = limelight.getLatestResult();
         limelight.start();
 
@@ -121,8 +124,25 @@ public class Main extends LinearOpMode {
         if (isStopRequested()) return;
 
         while (opModeIsActive()) {
+            NormalizedRGBA colors = sensor.getNormalizedColors();
+            hue = JavaUtil.colorToHue(colors.toColor());
+
             //limelight
             llResult = limelight.getLatestResult();
+
+            if(hue < 350 && hue > 225){
+                telemetry.addData("Color Detected:", "Purple");
+                telemetry.update();
+            }
+
+            if(hue > 90 && hue < 225){
+                telemetry.addData("Color Detected:", "Green");
+                telemetry.update();
+            }
+
+            if(hue > 350 || hue < 90){
+                telemetry.addData("Color Detected:", "NONE");
+            }
 
             //run kicker quickly
             if(kicker_start == 0){
@@ -216,7 +236,7 @@ public class Main extends LinearOpMode {
             //turn camera on/off
             if(gamepad1.right_bumper){
                 in_position = false;
-                rotator.setPosition(0.38);
+                rotator.setPosition(0.57);
                 camera_on = true;
             }
 
@@ -314,7 +334,7 @@ public class Main extends LinearOpMode {
         boolean end_state = false;
         int wait_time = 0;
 
-        spindex.setPosition(0);
+        spindex.setPosition(0.04);
         kicker_continuous.setPower(1);
         timer.reset();
         kicker_rotate.setPosition(0.6);
@@ -334,7 +354,7 @@ public class Main extends LinearOpMode {
             }
 
             if(current_state == 1 && timer.time() > 0.3){
-                spindex.setPosition(0.43);
+                spindex.setPosition(0.45);
                 timer.reset();
                 current_state++;
                 wait_time = 1;

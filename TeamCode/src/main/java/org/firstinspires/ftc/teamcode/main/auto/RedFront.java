@@ -36,8 +36,8 @@ import org.firstinspires.ftc.teamcode.MecanumDrive;
 import java.util.List;
 
 @Config
-@Autonomous(name = "Blue Front (Close)", group = "Autonomous")
-public class BlueFront extends LinearOpMode {
+@Autonomous(name = "Red Front (Close)", group = "Autonomous")
+public class RedFront extends LinearOpMode {
     private long startTime;
     private void initTime(){
         startTime = System.currentTimeMillis();
@@ -49,7 +49,7 @@ public class BlueFront extends LinearOpMode {
 
     private ElapsedTime timer = new ElapsedTime();
 
-//    //------------------------------------MOTORS--------------------------------------------
+    //    //------------------------------------MOTORS--------------------------------------------
     public class Intake {
         private DcMotorEx intake;
 
@@ -106,7 +106,7 @@ public class BlueFront extends LinearOpMode {
         public class LaunchOn implements Action{
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                double launchPower = (0.0025 * 185) + voltChange;
+                double launchPower = (0.0025 * 183) + voltChange;
                 launcher.setPower(launchPower);
                 return false;
             }
@@ -308,7 +308,7 @@ public class BlueFront extends LinearOpMode {
         public class Rotate implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet){
-                rotator.setPosition(0.38);
+                rotator.setPosition(0.57);
                 return false;
             }
         }
@@ -347,7 +347,7 @@ public class BlueFront extends LinearOpMode {
 //        }
 
         //instantiate at (0,0)
-        Pose2d initialPose = new Pose2d(0, 0, Math.toRadians(55));
+        Pose2d initialPose = new Pose2d(0, 0, Math.toRadians(-55));
 
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
@@ -365,33 +365,33 @@ public class BlueFront extends LinearOpMode {
 
         TrajectoryActionBuilder nothing2 = nothing.fresh()
                 .strafeToConstantHeading (new Vector2d(0, 15));
-                    new TranslationalVelConstraint(0.5);
+        new TranslationalVelConstraint(0.5);
 
         //launch
         TrajectoryActionBuilder launch1 = drive.actionBuilder(initialPose)
-                .strafeToLinearHeading (new Vector2d(-31, -45), Math.toRadians(45));
+                .strafeToLinearHeading (new Vector2d(-31, 45), Math.toRadians(-45));
 
 
         TrajectoryActionBuilder intake1 = launch1.fresh()
-                .strafeToLinearHeading (new Vector2d(-37, -20), Math.toRadians(90));
+                .strafeToLinearHeading (new Vector2d(-37, 20), Math.toRadians(-90));
 
         TrajectoryActionBuilder spindexFirst = intake1.fresh()
-                .strafeToConstantHeading(new Vector2d(-37,-4),
+                .strafeToConstantHeading(new Vector2d(-37,4),
                         new TranslationalVelConstraint(3.0));
 
         TrajectoryActionBuilder launch2 = spindexFirst.fresh()
-                .strafeToLinearHeading(new Vector2d(-31, -45), Math.toRadians(45));
+                .strafeToLinearHeading(new Vector2d(-31, 45), Math.toRadians(-45));
 
         TrajectoryActionBuilder intake2 = launch2.fresh()
-                .strafeToLinearHeading (new Vector2d(-62, -25), Math.toRadians(90))
-                .strafeToConstantHeading(new Vector2d(-62, -20));
+                .strafeToLinearHeading (new Vector2d(-62, 25), Math.toRadians(-90))
+                .strafeToConstantHeading(new Vector2d(-62, 20));
 
         TrajectoryActionBuilder spindex2 = intake2.fresh()
-                .strafeToConstantHeading(new Vector2d(-62,-4),
+                .strafeToConstantHeading(new Vector2d(-62,4),
                         new TranslationalVelConstraint(3.0));
 
         TrajectoryActionBuilder launch3 = spindex2.fresh()
-                .strafeToLinearHeading (new Vector2d(-31, -45), Math.toRadians(45));
+                .strafeToLinearHeading (new Vector2d(-31, 45), Math.toRadians(-45));
 
         //init things
         Actions.runBlocking(spindex.spindexLaunchOne());
@@ -431,20 +431,20 @@ public class BlueFront extends LinearOpMode {
                         new ParallelAction(
                                 launcher.launchOn(),
                                 new SequentialAction(
-                                    kickerRotate.kickerRotateUp(),
-                                    new SleepAction(0.5),
-                                    kickerRotate.kickerRotateDown(),
-                                    new SleepAction(0.4),
-                                    spindex.spindexLaunchTwo(),
-                                    new SleepAction(0.3),
-                                    kickerRotate.kickerRotateUp(),
-                                    new SleepAction(0.5),
-                                    kickerRotate.kickerRotateDown(),
-                                    new SleepAction(0.4),
-                                    spindex.spindexLaunchThree(),
-                                    new SleepAction(0.3),
-                                    kickerRotate.kickerRotateUp(),
-                                    new SleepAction(0.5)
+                                        kickerRotate.kickerRotateUp(),
+                                        new SleepAction(0.5),
+                                        kickerRotate.kickerRotateDown(),
+                                        new SleepAction(0.4),
+                                        spindex.spindexLaunchTwo(),
+                                        new SleepAction(0.3),
+                                        kickerRotate.kickerRotateUp(),
+                                        new SleepAction(0.5),
+                                        kickerRotate.kickerRotateDown(),
+                                        new SleepAction(0.4),
+                                        spindex.spindexLaunchThree(),
+                                        new SleepAction(0.3),
+                                        kickerRotate.kickerRotateUp(),
+                                        new SleepAction(0.5)
                                 )
                         ),
 
@@ -483,6 +483,7 @@ public class BlueFront extends LinearOpMode {
 //
                         new ParallelAction(
                                 launcher.launchOn(),
+                                rotator.rotate(),
                                 new SequentialAction(
                                         kickerRotate.kickerRotateUp(),
                                         new SleepAction(0.5),

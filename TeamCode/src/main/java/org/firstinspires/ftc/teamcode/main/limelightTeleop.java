@@ -17,6 +17,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
 @Disabled
+
 @TeleOp(name = "LimeLight Teleop", group = "Tele Op")
 public class limelightTeleop extends LinearOpMode {
     @Override
@@ -91,6 +92,14 @@ public class limelightTeleop extends LinearOpMode {
                     launchPosition += 0.0001;
                     rotator.setPosition(launchPosition);
                 }
+            }
+
+            if(gamepad2.right_bumper){
+                rotator.setPosition(1);
+            }
+
+            if(gamepad2.left_bumper){
+                rotator.setPosition(0);
             }
 
 //            if (camera_on && llResult.getTx() < -5){
