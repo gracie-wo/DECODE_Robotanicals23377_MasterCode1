@@ -36,8 +36,8 @@ import org.firstinspires.ftc.teamcode.MecanumDrive;
 import java.util.List;
 
 @Config
-@Autonomous(name = "Blue Front (Close)", group = "Autonomous")
-public class BlueFront extends LinearOpMode {
+@Autonomous(name = "Red Move Out)", group = "Autonomous")
+public class RedMoveoUT extends LinearOpMode {
     private long startTime;
     private void initTime(){
         startTime = System.currentTimeMillis();
@@ -49,7 +49,7 @@ public class BlueFront extends LinearOpMode {
 
     private ElapsedTime timer = new ElapsedTime();
 
-//    //------------------------------------MOTORS--------------------------------------------
+    //    //------------------------------------MOTORS--------------------------------------------
     public class Intake {
         private DcMotorEx intake;
 
@@ -309,7 +309,7 @@ public class BlueFront extends LinearOpMode {
         public class Rotate implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet){
-//                rotator.setPosition(0.38);
+                rotator.setPosition(0.57);
                 return false;
             }
         }
@@ -348,7 +348,7 @@ public class BlueFront extends LinearOpMode {
 //        }
 
         //instantiate at (0,0)
-        Pose2d initialPose = new Pose2d(0, 0, Math.toRadians(55));
+        Pose2d initialPose = new Pose2d(0, 0, Math.toRadians(-55));
 
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
@@ -362,43 +362,43 @@ public class BlueFront extends LinearOpMode {
 
 
         TrajectoryActionBuilder nothing = drive.actionBuilder(initialPose)
-                .strafeToConstantHeading (new Vector2d(0, 0));
+                .strafeToLinearHeading (new Vector2d(-20, 0), Math.toRadians(0));
 
         TrajectoryActionBuilder nothing2 = nothing.fresh()
                 .strafeToConstantHeading (new Vector2d(0, 15));
-                    new TranslationalVelConstraint(0.5);
+        new TranslationalVelConstraint(0.5);
 
         //launch
         TrajectoryActionBuilder launch1 = drive.actionBuilder(initialPose)
-                .strafeToLinearHeading (new Vector2d(-28, -42), Math.toRadians(45));
+                .strafeToLinearHeading (new Vector2d(-31, 45), Math.toRadians(-45));
 
 
         TrajectoryActionBuilder intake1 = launch1.fresh()
-                .strafeToLinearHeading (new Vector2d(-37, -20), Math.toRadians(90));
+                .strafeToLinearHeading (new Vector2d(-37, 20), Math.toRadians(-90));
 
         TrajectoryActionBuilder spindexFirst = intake1.fresh()
-                .strafeToConstantHeading(new Vector2d(-37,-4),
+                .strafeToConstantHeading(new Vector2d(-37,4),
                         new TranslationalVelConstraint(3.0));
 
         TrajectoryActionBuilder launch2 = spindexFirst.fresh()
-                .strafeToLinearHeading(new Vector2d(-28, -42), Math.toRadians(45));
+                .strafeToLinearHeading(new Vector2d(-31, 45), Math.toRadians(-45));
 
         TrajectoryActionBuilder intake2 = launch2.fresh()
-                .strafeToLinearHeading (new Vector2d(-62, -25), Math.toRadians(90))
-                .strafeToConstantHeading(new Vector2d(-62, -20));
+                .strafeToLinearHeading (new Vector2d(-62, 25), Math.toRadians(-90))
+                .strafeToConstantHeading(new Vector2d(-62, 20));
 
         TrajectoryActionBuilder spindex2 = intake2.fresh()
-                .strafeToConstantHeading(new Vector2d(-62,-4),
+                .strafeToConstantHeading(new Vector2d(-62,4),
                         new TranslationalVelConstraint(3.0));
 
         TrajectoryActionBuilder launch3 = spindex2.fresh()
-                .strafeToLinearHeading (new Vector2d(-28, -42), Math.toRadians(45));
+                .strafeToLinearHeading (new Vector2d(-31, 45), Math.toRadians(-45));
 
         //init things
-//        Actions.runBlocking(spindex.spindexLaunchOne());
-//        Actions.runBlocking(kickerRotate.kickerRotateDownInit());
-//        Actions.runBlocking(kickerCont.kickerContOn());
-//        Actions.runBlocking(rotator.rotate());
+        Actions.runBlocking(spindex.spindexLaunchOne());
+        Actions.runBlocking(kickerRotate.kickerRotateDownInit());
+        Actions.runBlocking(kickerCont.kickerContOn());
+        Actions.runBlocking(rotator.rotate());
 
 
         Action nothingA = nothing.build();
@@ -420,146 +420,7 @@ public class BlueFront extends LinearOpMode {
         // ------------------------- RUN AUTO -------------------------
         Actions.runBlocking(
                 new SequentialAction(
-
-                        new ParallelAction(
-                                kickerCont.kickerContOn(),
-                                spindex.spindexLaunchOne()
-                        ),
-
-                        new ParallelAction(
-
-                                spindex.spindexLaunchOne(),
-                                kickerRotate.kickerRotateDownInit(),
-                                kickerCont.kickerContOn(),
-                                launch1A,
-                                launcher.launchOn()
-//                                rotator.rotate()
-                        ),
-
-                        new SleepAction(1.5),
-//
-                        new ParallelAction(
-                                launcher.launchOn(),
-                                new SequentialAction(
-                                    kickerRotate.kickerRotateUp(),
-                                    new SleepAction(0.5),
-                                    kickerRotate.kickerRotateDown(),
-                                    new SleepAction(0.4),
-                                    spindex.spindexLaunchTwo(),
-                                    new SleepAction(0.3),
-                                    kickerRotate.kickerRotateUp(),
-                                    new SleepAction(0.5),
-                                    kickerRotate.kickerRotateDown(),
-                                    new SleepAction(0.4),
-                                    spindex.spindexLaunchThree(),
-                                    new SleepAction(0.3),
-                                    kickerRotate.kickerRotateUp(),
-                                    new SleepAction(0.5)
-                                )
-                        ),
-
-                        new ParallelAction(
-                                intake1A,
-                                launcher.launchOff(),
-                                kickerRotate.kickerRotateDown(),
-                                kickerCont.kickerContOff(),
-                                intake.intakeOn(),
-                                spindex.spindexIntakeOne()
-                        ),
-
-                        new ParallelAction(
-                                spindex1A,
-
-                                new SequentialAction(
-                                        spindex.spindexIntakeOne(),
-                                        new SleepAction(2),
-                                        spindex.spindexIntakeTwo(),
-                                        new SleepAction(2),
-                                        spindex.spindexIntakeThree(),
-                                        new SleepAction(2)
-                                )
-                        ),
-
-
-                        new ParallelAction(
-                                launch2A,
-                                intake.intakeOff(),
-                                launcher.launchOn(),
-                                kickerCont.kickerContOn(),
-                                spindex.spindexLaunchOne()
-                        ),
-
-                        new SleepAction(1.5),
-//
-                        new ParallelAction(
-                                launcher.launchOn(),
-                                new SequentialAction(
-                                        kickerRotate.kickerRotateUp(),
-                                        new SleepAction(0.5),
-                                        kickerRotate.kickerRotateDown(),
-                                        new SleepAction(0.4),
-                                        spindex.spindexLaunchTwo(),
-                                        new SleepAction(0.3),
-                                        kickerRotate.kickerRotateUp(),
-                                        new SleepAction(0.5),
-                                        kickerRotate.kickerRotateDown(),
-                                        new SleepAction(0.4),
-                                        spindex.spindexLaunchThree(),
-                                        new SleepAction(0.3),
-                                        kickerRotate.kickerRotateUp(),
-                                        new SleepAction(0.5)
-                                )
-                        ),
-
-                        new ParallelAction(
-                                intake2A,
-                                launcher.launchOff(),
-                                kickerRotate.kickerRotateDown(),
-                                kickerCont.kickerContOff(),
-                                intake.intakeOn(),
-                                spindex.spindexIntakeOne()
-                        ),
-
-                        new ParallelAction(
-                                spindex2A,
-
-                                new SequentialAction(
-                                        spindex.spindexIntakeOne(),
-                                        new SleepAction(2),
-                                        spindex.spindexIntakeTwo(),
-                                        new SleepAction(2),
-                                        spindex.spindexIntakeThree(),
-                                        new SleepAction(2)
-                                )
-                        ),
-
-                        new ParallelAction(
-                                launch3A,
-                                intake.intakeOff(),
-                                launcher.launchOn(),
-                                kickerCont.kickerContOn(),
-                                spindex.spindexLaunchOne()
-                        ),
-//
-                        new ParallelAction(
-                                launcher.launchOn(),
-                                new SequentialAction(
-                                        kickerRotate.kickerRotateUp(),
-                                        new SleepAction(0.5),
-                                        kickerRotate.kickerRotateDown(),
-                                        new SleepAction(0.4),
-                                        spindex.spindexLaunchTwo(),
-                                        new SleepAction(0.3),
-                                        kickerRotate.kickerRotateUp(),
-                                        new SleepAction(0.5),
-                                        kickerRotate.kickerRotateDown(),
-                                        new SleepAction(0.4),
-                                        spindex.spindexLaunchThree(),
-                                        new SleepAction(0.3),
-                                        kickerRotate.kickerRotateUp(),
-                                        new SleepAction(0.5)
-                                )
-                        )
+                    nothingA
                 )
         );
 

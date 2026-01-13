@@ -40,7 +40,7 @@ public class TESTING_AprilTagLimelight extends OpMode {
 
 //        tickPosition = 268;
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight.pipelineSwitch(1); //april tag #20 pipeline
+        limelight.pipelineSwitch(2); //april tag #20 pipeline
         imu = hardwareMap.get(IMU.class, "imu");
         RevHubOrientationOnRobot revHubOrientationOnRobot = new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.UP,

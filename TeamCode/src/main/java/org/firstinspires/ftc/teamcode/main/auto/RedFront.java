@@ -106,7 +106,8 @@ public class RedFront extends LinearOpMode {
         public class LaunchOn implements Action{
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                double launchPower = (0.0025 * 183) + voltChange;
+                //185
+                double launchPower = (0.0025 * 185) + voltChange;
                 launcher.setPower(launchPower);
                 return false;
             }
@@ -184,7 +185,7 @@ public class RedFront extends LinearOpMode {
         public class SpindexLaunchOne implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet){
-                spindex.setPosition(0.04);
+                spindex.setPosition(0);
                 return false;
             }
         }
@@ -196,7 +197,7 @@ public class RedFront extends LinearOpMode {
         public class SpindexLaunchTwo implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet){
-                spindex.setPosition(0.45);
+                spindex.setPosition(0.43);
                 return false;
             }
         }
@@ -394,10 +395,10 @@ public class RedFront extends LinearOpMode {
                 .strafeToLinearHeading (new Vector2d(-31, 45), Math.toRadians(-45));
 
         //init things
-        Actions.runBlocking(spindex.spindexLaunchOne());
-        Actions.runBlocking(kickerRotate.kickerRotateDownInit());
-        Actions.runBlocking(kickerCont.kickerContOn());
-        Actions.runBlocking(rotator.rotate());
+//        Actions.runBlocking(spindex.spindexLaunchOne());
+//        Actions.runBlocking(kickerRotate.kickerRotateDownInit());
+//        Actions.runBlocking(kickerCont.kickerContOn());
+//        Actions.runBlocking(rotator.rotate());
 
 
         Action nothingA = nothing.build();
@@ -421,9 +422,12 @@ public class RedFront extends LinearOpMode {
                 new SequentialAction(
 
                         new ParallelAction(
-
+                                spindex.spindexLaunchOne(),
+                                kickerRotate.kickerRotateDownInit(),
+                                kickerCont.kickerContOn(),
                                 launch1A,
-                                launcher.launchOn()
+                                launcher.launchOn(),
+                                rotator.rotate()
                         ),
 
                         new SleepAction(1.5),
@@ -568,7 +572,8 @@ public class RedFront extends LinearOpMode {
         double voltage = controlHubVoltageSensor.getVoltage();
 
         if(voltage >= 13.1){
-            return 0.05;
+            //0.05
+            return 0.025;
         } else if (voltage >= 12.6){
             return 0.1;
         } else if (voltage >= 12.1){

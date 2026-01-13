@@ -142,6 +142,7 @@ public class BlueMain extends LinearOpMode {
 
             if(hue > 350 || hue < 90){
                 telemetry.addData("Color Detected:", "NONE");
+                telemetry.update();
             }
 
             //run kicker quickly
@@ -220,7 +221,7 @@ public class BlueMain extends LinearOpMode {
             }
 
             if(gamepad1.dpad_left){
-                spindex.setPosition(0.04);
+                spindex.setPosition(0);
                 in_position = true;
             }
 
@@ -280,7 +281,7 @@ public class BlueMain extends LinearOpMode {
 //NOTE TO SELF: WHEN CODING INTAKE SPINDEX PLEASE SET IN_POSITION TO TRUE WHEN IT SPINS TO LUANCH POSITION AT THE END
 //PLEASE DON"T FORGET PLEASE PLEASE
                 if(!in_position){
-                    spindex.setPosition(0.05);
+                    spindex.setPosition(0);
                     ready = 1;
                     timer.reset();
                 } else {
@@ -314,7 +315,7 @@ public class BlueMain extends LinearOpMode {
 
             if(launchDistanceChange && llResult != null && llResult.isValid()){
                 double distance = getDistanceFromTags(llResult.getTa());
-                double launchPower = (0.0025 * distance) + voltChange;
+                double launchPower = (0.0025 * (distance-20)) + voltChange;
                 launcher.setPower(launchPower);
             }
 
@@ -322,6 +323,9 @@ public class BlueMain extends LinearOpMode {
                 launcher.setPower((0.0025 * 185) + voltChange);
             }
 
+            if(gamepad2.left_bumper){
+                intake.setPower(-1);
+            }
         }
 
     }
@@ -338,7 +342,7 @@ public class BlueMain extends LinearOpMode {
         boolean end_state = false;
         int wait_time = 0;
 
-        spindex.setPosition(0.04);
+        spindex.setPosition(0);
         kicker_continuous.setPower(1);
         timer.reset();
         kicker_rotate.setPosition(0.6);
@@ -358,7 +362,7 @@ public class BlueMain extends LinearOpMode {
             }
 
             if(current_state == 1 && timer.time() > 0.3){
-                spindex.setPosition(0.45);
+                spindex.setPosition(0.43);
                 timer.reset();
                 current_state++;
                 wait_time = 1;
@@ -387,6 +391,7 @@ public class BlueMain extends LinearOpMode {
         double voltage = controlHubVoltageSensor.getVoltage();
 
         if(voltage >= 13.1){
+            //0.025
             return 0.05;
         } else if (voltage >= 12.6){
             return 0.1;
