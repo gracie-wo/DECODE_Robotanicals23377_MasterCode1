@@ -35,21 +35,15 @@ import org.firstinspires.ftc.teamcode.MecanumDrive;
 
 import java.util.List;
 
+//blue april tag
 @Config
-@Autonomous(name = "Blue Back (Far)", group = "Autonomous")
-public class BlueBack extends LinearOpMode {
-    private long startTime;
-    private void initTime(){
-        startTime = System.currentTimeMillis();
-    }
+@Autonomous(name = "TESTING_limelight", group = "testing")
+public class TESTING_limelight extends LinearOpMode {
 
-    private boolean hasBeenTime(int milli){
-        return (System.currentTimeMillis() - startTime) >= milli;
-    }
+    //limelight
+    String pattern = "LLL";
 
-    private ElapsedTime timer = new ElapsedTime();
-
-    //    //------------------------------------MOTORS--------------------------------------------
+     //------------------------------------MOTORS--------------------------------------------
     public class Intake {
         private DcMotorEx intake;
 
@@ -106,7 +100,8 @@ public class BlueBack extends LinearOpMode {
         public class LaunchOn implements Action{
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                double launchPower = (0.0025 * 185) + voltChange;
+                //185
+                double launchPower = (0.0025 * 175) + voltChange;
                 launcher.setPower(launchPower);
                 return false;
             }
@@ -184,7 +179,7 @@ public class BlueBack extends LinearOpMode {
         public class SpindexLaunchOne implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet){
-                spindex.setPosition(0.04);
+                spindex.setPosition(0);
                 return false;
             }
         }
@@ -196,7 +191,7 @@ public class BlueBack extends LinearOpMode {
         public class SpindexLaunchTwo implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet){
-                spindex.setPosition(0.45);
+                spindex.setPosition(0.43);
                 return false;
             }
         }
@@ -308,7 +303,7 @@ public class BlueBack extends LinearOpMode {
         public class Rotate implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet){
-                rotator.setPosition(0.38);
+//                rotator.setPosition(0.38);
                 return false;
             }
         }
@@ -326,12 +321,49 @@ public class BlueBack extends LinearOpMode {
 
         MecanumDrive drive = new MecanumDrive(hardwareMap, initialPose);
 
+        Rotator rotator = new Rotator(hardwareMap);
 
-        TrajectoryActionBuilder nothing = drive.actionBuilder(initialPose)
-                .strafeToConstantHeading (new Vector2d(0, 25));
+        Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight.pipelineSwitch(0);
+        LLResult llResult = limelight.getLatestResult();
+        limelight.start();
 
 
-        Action move = nothing.build();
+//        TrajectoryActionBuilder nothing = drive.actionBuilder(initialPose)
+//                .strafeToConstantHeading (new Vector2d(0, 25));
+
+
+        //detect mosaic pattern
+        while(opModeInInit()){
+            llResult = limelight.getLatestResult();
+
+            int tagId = 21;
+
+            if(llResult != null && llResult.isValid()) {
+                List<LLResultTypes.FiducialResult> fiducials = llResult.getFiducialResults();
+
+                for (LLResultTypes.FiducialResult fiducial : fiducials) {
+                    // This is the AprilTag ID
+                    tagId = (int) fiducial.getFiducialId();
+
+                    if (tagId == 21) {
+                        pattern = "GPP";
+                        telemetry.addData("Detected Tag ID", "GPP");
+                    } else if (tagId == 22) {
+                        pattern = "PGP";
+                        telemetry.addData("Detected Tag ID", "PGP");
+                    } else if (tagId == 23) {
+                        pattern = "PPG";
+                        telemetry.addData("Detected Tag ID", "PPG");
+                    }
+
+                    telemetry.update();
+                }
+            }
+        }
+
+//        Action move = nothing.build();
+
         waitForStart();
         if (isStopRequested()) return;
 
@@ -339,7 +371,9 @@ public class BlueBack extends LinearOpMode {
         // ------------------------- RUN AUTO -------------------------
         Actions.runBlocking(
                 new SequentialAction(
-                        move
+//                        limelight.detectPattern(),
+                        rotator.rotate(),
+                        new SleepAction(30)
                 )
         );
 

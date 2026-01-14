@@ -20,7 +20,7 @@
  *   SOFTWARE.
  */
 
-package org.firstinspires.ftc.teamcode.main;
+package org.firstinspires.ftc.teamcode.main.disabled;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
