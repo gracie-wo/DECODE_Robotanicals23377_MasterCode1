@@ -5,16 +5,10 @@ import androidx.annotation.NonNull;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.ParallelAction;
 import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.Rotation2d;
 import com.acmerobotics.roadrunner.SequentialAction;
 import com.acmerobotics.roadrunner.SleepAction;
-import com.acmerobotics.roadrunner.TrajectoryActionBuilder;
-import com.acmerobotics.roadrunner.TranslationalVelConstraint;
-import com.acmerobotics.roadrunner.Vector2d;
 import com.acmerobotics.roadrunner.ftc.Actions;
-import com.qualcomm.hardware.limelightvision.LLFieldMap;
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
@@ -22,14 +16,10 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorControllerEx;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
-import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 
@@ -38,7 +28,7 @@ import java.util.List;
 //blue april tag
 @Config
 @Autonomous(name = "TESTING_limelight", group = "testing")
-public class TESTING_limelight extends LinearOpMode {
+public class TESTING_limelightAuto extends LinearOpMode {
 
     //limelight
     String pattern = "LLL";
@@ -127,17 +117,54 @@ public class TESTING_limelight extends LinearOpMode {
     //----------------------------SERVOS---------------------------------------------------
     public class Spindex {
         private Servo spindex;
-        private boolean initialized = false;
+
+        int linePickUp;
 
         public Spindex(HardwareMap hardwareMap){
             spindex = hardwareMap.get(Servo.class, "spindex");
+            linePickUp = 1;
+            //values for pickup (1, 2, 3): 1, 0.1, 0.56
         }
 
         //intake
         public class SpindexIntakeOne implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet){
-                //old value - 0.085
+                if(linePickUp == 1){
+                    if(pattern.equals("GPP")){
+                        spindex.setPosition(0.1);
+                        return false;
+                    } else if(pattern.equals("PGP")){
+                        spindex.setPosition(1);
+                        return false;
+                    } else if(pattern.equals("PPG")){
+                        spindex.setPosition(1);
+                        return false;
+                    }
+                } else if(linePickUp == 2){
+                    if(pattern.equals("GPP")){
+                        spindex.setPosition(0.56);
+                        return false;
+                    } else if(pattern.equals("PGP")){
+                        spindex.setPosition(0.56);
+                        return false;
+                    } else if(pattern.equals("PPG")){
+                        spindex.setPosition(0.1);
+                        return false;
+                    }
+                } else if(linePickUp == 3){
+                    if(pattern.equals("GPP")){
+                        spindex.setPosition(1);
+                        return false;
+                    } else if(pattern.equals("PGP")){
+                        spindex.setPosition(0.1);
+                        return false;
+                    } else if(pattern.equals("PPG")){
+                        spindex.setPosition(0.56);
+                        return false;
+                    }
+                }
+
                 spindex.setPosition(0.1);
                 return false;
             }
@@ -151,7 +178,41 @@ public class TESTING_limelight extends LinearOpMode {
         public class SpindexIntakeTwo implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet){
-                //old value = 0.52
+                if(linePickUp == 1){
+                    if(pattern.equals("GPP")){
+                        spindex.setPosition(0.56);
+                        return false;
+                    } else if(pattern.equals("PGP")){
+                        spindex.setPosition(0.56);
+                        return false;
+                    } else if(pattern.equals("PPG")){
+                        spindex.setPosition(0.1);
+                        return false;
+                    }
+                } else if(linePickUp == 2){
+                    if(pattern.equals("GPP")){
+                        spindex.setPosition(1);
+                        return false;
+                    } else if(pattern.equals("PGP")){
+                        spindex.setPosition(0.1);
+                        return false;
+                    } else if(pattern.equals("PPG")){
+                        spindex.setPosition(0.56);
+                        return false;
+                    }
+                } else if(linePickUp == 3){
+                    if(pattern.equals("GPP")){
+                        spindex.setPosition(0.56);
+                        return false;
+                    } else if(pattern.equals("PGP")){
+                        spindex.setPosition(0.56);
+                        return false;
+                    } else if(pattern.equals("PPG")){
+                        spindex.setPosition(0.1);
+                        return false;
+                    }
+                }
+
                 spindex.setPosition(0.56);
                 return false;
             }
@@ -165,8 +226,46 @@ public class TESTING_limelight extends LinearOpMode {
         public class SpindexIntakeThree implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet){
-                //old value - 0.96
-                spindex.setPosition(1.0);
+                if(linePickUp == 1){
+                    if(pattern.equals("GPP")){
+                        spindex.setPosition(1);
+                        return false;
+                    } else if(pattern.equals("PGP")){
+                        spindex.setPosition(0.1);
+                        return false;
+                    } else if(pattern.equals("PPG")){
+                        spindex.setPosition(0.56);
+                        return false;
+                    }
+
+                    linePickUp = 2;
+                } else if(linePickUp == 2){
+                    if(pattern.equals("GPP")){
+                        spindex.setPosition(0.1);
+                        return false;
+                    } else if(pattern.equals("PGP")){
+                        spindex.setPosition(1);
+                        return false;
+                    } else if(pattern.equals("PPG")){
+                        spindex.setPosition(1);
+                        return false;
+                    }
+
+                    linePickUp = 3;
+                } else if(linePickUp == 3){
+                    if(pattern.equals("GPP")){
+                        spindex.setPosition(0.1);
+                        return false;
+                    } else if(pattern.equals("PGP")){
+                        spindex.setPosition(1);
+                        return false;
+                    } else if(pattern.equals("PPG")){
+                        spindex.setPosition(1);
+                        return false;
+                    }
+                }
+
+                spindex.setPosition(1);
                 return false;
             }
         }
