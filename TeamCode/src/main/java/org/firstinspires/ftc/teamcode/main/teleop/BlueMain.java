@@ -315,6 +315,7 @@ public class BlueMain extends LinearOpMode {
 
             if(launchDistanceChange && llResult != null && llResult.isValid()){
                 double distance = getDistanceFromTags(llResult.getTa());
+//CHAGNGEN -20 DISTANCE AFTER CLAIBRATION-------------------------------------------------------------------------
                 double launchPower = (0.0025 * (distance-20)) + voltChange;
                 launcher.setPower(launchPower);
             }
@@ -391,7 +392,6 @@ public class BlueMain extends LinearOpMode {
         double voltage = controlHubVoltageSensor.getVoltage();
 
         if(voltage >= 13.1){
-            //0.025
             return 0.05;
         } else if (voltage >= 12.6){
             return 0.1;
@@ -404,7 +404,7 @@ public class BlueMain extends LinearOpMode {
         } else if (voltage >= 10.6){
             return 0.2;
         } else {
-            return 0.225;
+            return 0.05;
         }
     }
 }
