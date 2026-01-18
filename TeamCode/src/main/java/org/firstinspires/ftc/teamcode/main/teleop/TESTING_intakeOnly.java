@@ -11,6 +11,7 @@ public class TESTING_intakeOnly extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
 
         DcMotor intake = hardwareMap.dcMotor.get("intake");
+        Servo spindex = hardwareMap.get(Servo.class, "spindex");
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -22,16 +23,29 @@ public class TESTING_intakeOnly extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            if(gamepad1.dpad_up){
+            if(gamepad1.y){
                 intake.setPower(1);
             }
 
-            if(gamepad1.dpad_down){
+            if(gamepad1.x){
                 intake.setPower(0);
             }
 
-            if(gamepad1.dpad_right){
+            if(gamepad1.b){
                 intake.setPower(-1);
+            }
+
+            if(gamepad1.dpad_up){
+                spindex.setPosition(0);
+            }
+
+            if(gamepad1.dpad_right){
+                spindex.setPosition(0.43);
+            }
+
+
+            if(gamepad1.dpad_down){
+                spindex.setPosition(0.87);
             }
 
 

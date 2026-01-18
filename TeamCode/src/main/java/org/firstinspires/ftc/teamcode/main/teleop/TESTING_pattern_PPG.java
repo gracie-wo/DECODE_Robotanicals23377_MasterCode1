@@ -6,6 +6,7 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
@@ -41,6 +42,9 @@ public class TESTING_pattern_PPG extends LinearOpMode {
         double hue = 0.0;
         String color_detected = "None";
 
+        Servo kicker_rotate = hardwareMap.get(Servo.class, "kicker1");
+        CRServo kicker_continuous = hardwareMap.get(CRServo.class, "kicker2");
+
 //        DcMotor launcher = hardwareMap.dcMotor.get("launcher");
 //        launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
@@ -58,6 +62,14 @@ public class TESTING_pattern_PPG extends LinearOpMode {
         //launch spindex
         boolean in_position = false;
         boolean spinToLaunch = false;
+        boolean stopLaunchSequence = false;
+        int rotate_state = 0;
+        int current_state = 0;
+        int wait_time = 0;
+        boolean end_state = false;
+        double spinTime = 0.4;
+        boolean start = false;
+        boolean restart = false;
 
 
         telemetry.addData("Status", "Initialized");
@@ -155,11 +167,11 @@ public class TESTING_pattern_PPG extends LinearOpMode {
             }
 
             if(gamepad1.right_bumper){
-                if(onetwothreeShoot){
+                if (onetwothreeShoot) {
                     telemetry.addData("Shoot", "one two three");
-                } else if(threetwooneShoot){
+                } else if (threetwooneShoot) {
                     telemetry.addData("Shoot", "three two one");
-                } else if(onethreetwoShoot){
+                } else if (onethreetwoShoot) {
                     telemetry.addData("Shoot", "one three two");
                 }
 
@@ -170,16 +182,48 @@ public class TESTING_pattern_PPG extends LinearOpMode {
                 adjusted = false;
             }
 
-
-
             //launching spindex
+            //add a thing where after stopping it will start in the position it ended
+            //use int to count
+            if(gamepad1.dpad_left){
+                stopLaunchSequence = true;
+                kicker_continuous.setPower(0);
+                kicker_rotate.setPosition(0.3);
+                restart = true;
+            }
+
             if(gamepad1.left_bumper){
-                if(!in_position){
-                    spindex.setPosition(0);
-                    spinToLaunch = true;
+                if(!restart) {
+                    in_position = false;
+                    spinToLaunch = false;
+                    stopLaunchSequence = false;
+                    rotate_state = 0;
+                    current_state = 0;
+                    wait_time = 0;
+                    end_state = false;
+                    spinTime = 0.4;
+                    start = true;
+
+                    if (!in_position) {
+                        if (onetwothreeShoot) {
+                            spindex.setPosition(0);
+                        } else if (threetwooneShoot) {
+                            spindex.setPosition(0.87);
+                        } else if (onethreetwoShoot) {
+                            spindex.setPosition(0);
+                        }
+
+                        spinToLaunch = true;
+                        timer.reset();
+                    } else {
+                        in_position = true;
+                    }
+                } else if (restart){
+                    stopLaunchSequence = false;
+                    rotate_state = 0;
+                    wait_time = 1;
+                    kicker_continuous.setPower(1);
                     timer.reset();
-                } else {
-                    in_position = true;
                 }
             }
 
@@ -188,11 +232,70 @@ public class TESTING_pattern_PPG extends LinearOpMode {
                 in_position = true;
             }
 
-            if(in_position){
+            if(start && in_position && !stopLaunchSequence){
+                if(onetwothreeShoot){
+                    spindex.setPosition(0);
+                } else if(threetwooneShoot){
+                    spindex.setPosition(0.87);
+                } else if(onethreetwoShoot){
+                    spindex.setPosition(0);
+                }
 
-
+                kicker_continuous.setPower(1);
+                kicker_rotate.setPosition(0.6);
+                rotate_state = 1;
+                timer.reset();
 
                 in_position = false;
+            }
+
+            if(!stopLaunchSequence && rotate_state == 1 && timer.time() > 0.5){
+                kicker_rotate.setPosition(0.3);
+                current_state++;
+                rotate_state = 0;
+                timer.reset();
+
+                if(end_state){
+                    kicker_continuous.setPower(0);
+                    start = false;
+                    restart = false;
+                }
+            }
+
+            if(!stopLaunchSequence && current_state == 1 && timer.time() > 0.3){
+                if(onetwothreeShoot){
+                    spindex.setPosition(0.43);
+                } else if(threetwooneShoot){
+                    spindex.setPosition(0.43);
+                } else if (onethreetwoShoot){
+                    spindex.setPosition(0.87);
+                    spinTime = 0.6;
+                }
+                timer.reset();
+                current_state++;
+                wait_time = 1;
+            }
+
+            if(!stopLaunchSequence && current_state == 3 && timer.time() > 0.3){
+                wait_time = 1;
+                if(onetwothreeShoot) {
+                    spindex.setPosition(0.87);
+                } else if(threetwooneShoot){
+                    spindex.setPosition(0);
+                } else if(onethreetwoShoot){
+                    spindex.setPosition(0.43);
+                }
+                current_state++;
+                end_state = true;
+                timer.reset();
+            }
+
+            if(!stopLaunchSequence && wait_time == 1 && timer.time() > spinTime){
+                kicker_rotate.setPosition(0.6);
+                rotate_state = 1;
+                wait_time = 0;
+                timer.reset();
+                spinTime = 0.4;
             }
 
         }
