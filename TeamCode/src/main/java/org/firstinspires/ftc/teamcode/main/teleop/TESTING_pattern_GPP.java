@@ -6,6 +6,7 @@ import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
@@ -41,12 +42,15 @@ public class TESTING_pattern_GPP extends LinearOpMode {
         double hue = 0.0;
         String color_detected = "None";
 
+        Servo kicker_rotate = hardwareMap.get(Servo.class, "kicker1");
+        CRServo kicker_continuous = hardwareMap.get(CRServo.class, "kicker2");
+
 //        DcMotor launcher = hardwareMap.dcMotor.get("launcher");
 //        launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         ElapsedTime timer = new ElapsedTime();
 
-
+        //intake & spindex
         boolean adjusted = false;
         int ballPickUp = 1;
         boolean onetwothreeShoot = false;
@@ -55,6 +59,17 @@ public class TESTING_pattern_GPP extends LinearOpMode {
         boolean detected = false;
         boolean sensing = false;
 
+        //launch spindex
+        boolean in_position = false;
+        boolean spinToLaunch = false;
+        boolean stopLaunchSequence = false;
+        int rotate_state = 0;
+        int current_state = 0;
+        int wait_time = 0;
+        boolean end_state = false;
+        double spinTime = 0.4;
+        boolean start = false;
+        boolean restart = false;
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -65,22 +80,21 @@ public class TESTING_pattern_GPP extends LinearOpMode {
         while (opModeIsActive()) {
             NormalizedRGBA colors = sensor.getNormalizedColors();
             hue = JavaUtil.colorToHue(colors.toColor());
-//            mosaic(llResult, limelight);
 
             if(hue < 350 && hue > 225){
                 color_detected = "Purple";
-//                telemetry.addData("Color Detected:", "Purple");
-//                telemetry.update();
+                telemetry.addData("Color Detected:", "Purple");
+                telemetry.update();
                 detected = true;
             } else if(hue > 90 && hue < 225){
                 color_detected = "Green";
-//                telemetry.addData("Color Detected:", "Green");
-//                telemetry.update();
+                telemetry.addData("Color Detected:", "Green");
+                telemetry.update();
                 detected = true;
             } else {
                 color_detected = "None";
-//                telemetry.addData("Color Detected:", "None");
-//                telemetry.update();
+                telemetry.addData("Color Detected:", "None");
+                telemetry.update();
                 detected = false;
             }
 
@@ -135,10 +149,6 @@ public class TESTING_pattern_GPP extends LinearOpMode {
                 }
             }
 
-            if(gamepad1.x){
-//                intake.setPower(0);
-            }
-
             if(gamepad1.dpad_up){
                 spindex.setPosition(0);
             }
@@ -151,19 +161,7 @@ public class TESTING_pattern_GPP extends LinearOpMode {
             if(gamepad1.dpad_down){
                 spindex.setPosition(0.87);
             }
-            //add command to stop
 
-//            if(gamepad2.b && onetwothreeShoot){
-//                spindex.setPosition(0, 0.43, 0.87);
-//            }
-//
-//            if(threetwooneShoot){
-//                spindex.setPosition(0.87, 0.43, 0);
-//            }
-//
-//            if(twothreeoneShoot){
-//                spindex.setPosition(0.43, 0.87, )
-//            }
 
             if(gamepad1.right_bumper){
                 if(onetwothreeShoot){
@@ -181,51 +179,119 @@ public class TESTING_pattern_GPP extends LinearOpMode {
                 adjusted = false;
             }
 
+            //launching spindex
+            if(gamepad1.dpad_left){
+                stopLaunchSequence = true;
+                kicker_continuous.setPower(0);
+                kicker_rotate.setPosition(0.3);
+                restart = true;
+            }
 
+            if(gamepad1.left_bumper){
+                if(!restart) {
+                    spinToLaunch = false;
+                    stopLaunchSequence = false;
+                    rotate_state = 0;
+                    current_state = 0;
+                    wait_time = 0;
+                    end_state = false;
+                    spinTime = 0.4;
+                    start = true;
 
+                    if (!in_position) {
+                        if (onetwothreeShoot) {
+                            spindex.setPosition(0);
+                        } else if (threetwooneShoot) {
+                            spindex.setPosition(0.87);
+                        } else if (twothreeoneShoot) {
+                            spindex.setPosition(0.43);
+                        }
 
-
-
-//            if (llResult != null && llResult.isValid()){
-//                Pose3D botPose = llResult.getBotpose_MT2();
-//                telemetry.addData("Tx" , llResult.getTx());
-//                telemetry.addData("Ty", llResult.getTy());
-//                telemetry.addData("Ta", llResult.getTa());
-//                telemetry.addData("BotPose", botPose.toString());
-////            telemetry.addData("Yaw", botPose.getOrientation().getYaw());
-//                telemetry.update();
-//            }
-        }
-
-    }
-
-    public void mosaic(LLResult llResult, Limelight3A limelight){
-        int n = 0;
-        while(n <= 10) {
-            llResult = limelight.getLatestResult();
-
-            int tagId = 21;
-
-            if (llResult != null && llResult.isValid()) {
-                List<LLResultTypes.FiducialResult> fiducials = llResult.getFiducialResults();
-
-                for (LLResultTypes.FiducialResult fiducial : fiducials) {
-                    // This is the AprilTag ID
-                    tagId = (int) fiducial.getFiducialId();
-
-                    if (tagId == 21) {
-                        telemetry.addData("Detected Tag ID", "GPP");
-                    } else if (tagId == 22) {
-                        telemetry.addData("Detected Tag ID", "PGP");
-                    } else if (tagId == 23) {
-                        telemetry.addData("Detected Tag ID", "PPG");
+                        spinToLaunch = true;
+                        timer.reset();
                     }
-
-                    telemetry.update();
+                } else {
+                    stopLaunchSequence = false;
+                    rotate_state = 0;
+                    wait_time = 1;
+                    kicker_continuous.setPower(1);
+                    timer.reset();
                 }
             }
 
-            n++;
+            if(spinToLaunch && timer.time() > 0.6){
+                spinToLaunch = false;
+                in_position = true;
+            }
+
+            if(start && in_position && !stopLaunchSequence){
+                if(onetwothreeShoot){
+                    spindex.setPosition(0);
+                } else if(threetwooneShoot){
+                    spindex.setPosition(0.87);
+                } else if(twothreeoneShoot){
+                    spindex.setPosition(0.43);
+                }
+
+                kicker_continuous.setPower(1);
+                kicker_rotate.setPosition(0.6);
+                rotate_state = 1;
+                timer.reset();
+
+                in_position = false;
+            }
+
+            if(!stopLaunchSequence && rotate_state == 1 && timer.time() > 0.5){
+                kicker_rotate.setPosition(0.3);
+                current_state++;
+                rotate_state = 0;
+                timer.reset();
+
+                if(end_state){
+                    kicker_continuous.setPower(0);
+                    start = false;
+                    restart = false;
+                }
+            }
+
+            if(!stopLaunchSequence && current_state == 1 && timer.time() > 0.3){
+                if(onetwothreeShoot){
+                    spindex.setPosition(0.43);
+                } else if(threetwooneShoot){
+                    spindex.setPosition(0.43);
+                } else if (twothreeoneShoot){
+                    spindex.setPosition(0.87);
+                }
+                timer.reset();
+                current_state++;
+                wait_time = 1;
+            }
+
+            if(!stopLaunchSequence && current_state == 3 && timer.time() > 0.3){
+                wait_time = 1;
+                if(onetwothreeShoot) {
+                    spindex.setPosition(0.87);
+                } else if(threetwooneShoot){
+                    spindex.setPosition(0);
+                } else if(twothreeoneShoot){
+                    spindex.setPosition(0.43);
+                    spinTime = 0.6;
+                }
+                current_state++;
+                end_state = true;
+                timer.reset();
+            }
+
+            if(!stopLaunchSequence && wait_time == 1 && timer.time() > spinTime){
+                kicker_rotate.setPosition(0.6);
+                rotate_state = 1;
+                wait_time = 0;
+                timer.reset();
+                spinTime = 0.4;
+            }
+
         }
+
     }
+
 }

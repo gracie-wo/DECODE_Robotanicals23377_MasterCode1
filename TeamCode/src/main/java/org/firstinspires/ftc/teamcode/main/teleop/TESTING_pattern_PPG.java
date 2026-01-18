@@ -183,8 +183,6 @@ public class TESTING_pattern_PPG extends LinearOpMode {
             }
 
             //launching spindex
-            //add a thing where after stopping it will start in the position it ended
-            //use int to count
             if(gamepad1.dpad_left){
                 stopLaunchSequence = true;
                 kicker_continuous.setPower(0);
@@ -194,7 +192,6 @@ public class TESTING_pattern_PPG extends LinearOpMode {
 
             if(gamepad1.left_bumper){
                 if(!restart) {
-                    in_position = false;
                     spinToLaunch = false;
                     stopLaunchSequence = false;
                     rotate_state = 0;
@@ -215,10 +212,8 @@ public class TESTING_pattern_PPG extends LinearOpMode {
 
                         spinToLaunch = true;
                         timer.reset();
-                    } else {
-                        in_position = true;
                     }
-                } else if (restart){
+                } else {
                     stopLaunchSequence = false;
                     rotate_state = 0;
                     wait_time = 1;
