@@ -7,6 +7,7 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
@@ -34,8 +35,8 @@ public class TESTING_pattern_PPG extends LinearOpMode {
 //        LLResult llResult = limelight.getLatestResult();
 //        limelight.start();
 
-//        DcMotor intake = hardwareMap.dcMotor.get("intake");
-//        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        DcMotor intake = hardwareMap.dcMotor.get("intake");
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         Servo spindex = hardwareMap.get(Servo.class, "spindex");
         NormalizedColorSensor sensor = hardwareMap.get(NormalizedColorSensor.class, "colorSensor");
@@ -83,32 +84,36 @@ public class TESTING_pattern_PPG extends LinearOpMode {
             hue = JavaUtil.colorToHue(colors.toColor());
 
             //intake & spindex
-            if(hue < 350 && hue > 225){
+            if(hue < 245 && hue > 220){
                 color_detected = "Purple";
-//                telemetry.addData("Color Detected:", "Purple");
-//                telemetry.update();
+                telemetry.addData("Color Detected:", "Purple");
+                telemetry.update();
                 detected = true;
-            } else if(hue > 90 && hue < 225){
+            } else if(hue > 120 && hue < 185){
                 color_detected = "Green";
-//                telemetry.addData("Color Detected:", "Green");
-//                telemetry.update();
+                telemetry.addData("Color Detected:", "Green");
+                telemetry.update();
                 detected = true;
             } else {
                 color_detected = "None";
-//                telemetry.addData("Color Detected:", "None");
-//                telemetry.update();
+                telemetry.addData("Color Detected:", "None");
+                telemetry.update();
                 detected = false;
             }
 
             if(gamepad1.y){
                 spindex.setPosition(1);
-//                intake.setPower();
+                intake.setPower(1);
                 ballPickUp = 1;
                 onetwothreeShoot = false;
                 threetwooneShoot = false;
                 onethreetwoShoot = false;
                 adjusted = false;
                 sensing = true;
+            }
+
+            if(gamepad1.x){
+                intake.setPower(0);
             }
 
             //green ball first
@@ -124,7 +129,7 @@ public class TESTING_pattern_PPG extends LinearOpMode {
                     ballPickUp = 3;
                     timer.reset();
                 } else if (ballPickUp == 3 && detected && (timer.time() > 0.3)) {
-                    //intake.setPower(-1)
+                    intake.setPower(-1);
                     if (onetwothreeShoot) {
                         spindex.setPosition(0);
                     } else if (threetwooneShoot) {

@@ -82,12 +82,12 @@ public class TESTING_pattern_PGP extends LinearOpMode {
             NormalizedRGBA colors = sensor.getNormalizedColors();
             hue = JavaUtil.colorToHue(colors.toColor());
 
-            if(hue < 350 && hue > 225){
+            if(hue < 245 && hue > 220){
                 color_detected = "Purple";
                 telemetry.addData("Color Detected:", "Purple");
                 telemetry.update();
                 detected = true;
-            } else if(hue > 90 && hue < 225){
+            } else if(hue > 120 && hue < 185){
                 color_detected = "Green";
                 telemetry.addData("Color Detected:", "Green");
                 telemetry.update();
