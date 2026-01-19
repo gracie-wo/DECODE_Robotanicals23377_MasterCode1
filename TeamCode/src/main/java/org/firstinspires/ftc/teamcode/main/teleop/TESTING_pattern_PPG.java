@@ -61,7 +61,7 @@ public class TESTING_pattern_PPG extends LinearOpMode {
 
         //launch spindex
         boolean in_position = false;
-        boolean spinToLaunch = false;
+        int spinToLaunch = 0;
         boolean stopLaunchSequence = false;
         int rotate_state = 0;
         int current_state = 0;
@@ -85,18 +85,18 @@ public class TESTING_pattern_PPG extends LinearOpMode {
             //intake & spindex
             if(hue < 350 && hue > 225){
                 color_detected = "Purple";
-                telemetry.addData("Color Detected:", "Purple");
-                telemetry.update();
+//                telemetry.addData("Color Detected:", "Purple");
+//                telemetry.update();
                 detected = true;
             } else if(hue > 90 && hue < 225){
                 color_detected = "Green";
-                telemetry.addData("Color Detected:", "Green");
-                telemetry.update();
+//                telemetry.addData("Color Detected:", "Green");
+//                telemetry.update();
                 detected = true;
             } else {
                 color_detected = "None";
-                telemetry.addData("Color Detected:", "None");
-                telemetry.update();
+//                telemetry.addData("Color Detected:", "None");
+//                telemetry.update();
                 detected = false;
             }
 
@@ -132,6 +132,7 @@ public class TESTING_pattern_PPG extends LinearOpMode {
                     } else if (onethreetwoShoot) {
                         spindex.setPosition(0);
                     }
+
                     in_position = true;
                     sensing = false;
                 } else if (color_detected.equals("Purple") && ballPickUp == 1 && !adjusted) {
@@ -188,11 +189,13 @@ public class TESTING_pattern_PPG extends LinearOpMode {
                 kicker_continuous.setPower(0);
                 kicker_rotate.setPosition(0.3);
                 restart = true;
+                start = false;
             }
 
-            if(gamepad1.left_bumper){
+
+            if(gamepad1.left_bumper && !start){
                 if(!restart) {
-                    spinToLaunch = false;
+                    spinToLaunch = 0;
                     stopLaunchSequence = false;
                     rotate_state = 0;
                     current_state = 0;
@@ -210,7 +213,7 @@ public class TESTING_pattern_PPG extends LinearOpMode {
                             spindex.setPosition(0);
                         }
 
-                        spinToLaunch = true;
+                        spinToLaunch = 1;
                         timer.reset();
                     }
                 } else {
@@ -222,8 +225,8 @@ public class TESTING_pattern_PPG extends LinearOpMode {
                 }
             }
 
-            if(spinToLaunch && timer.time() > 0.6){
-                spinToLaunch = false;
+            if(spinToLaunch == 1 && timer.time() > 0.6){
+                spinToLaunch = 0;
                 in_position = true;
             }
 
@@ -239,6 +242,7 @@ public class TESTING_pattern_PPG extends LinearOpMode {
                 kicker_continuous.setPower(1);
                 kicker_rotate.setPosition(0.6);
                 rotate_state = 1;
+                wait_time = 0;
                 timer.reset();
 
                 in_position = false;

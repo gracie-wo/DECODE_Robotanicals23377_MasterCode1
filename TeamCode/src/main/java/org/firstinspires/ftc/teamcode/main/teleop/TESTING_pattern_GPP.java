@@ -130,6 +130,9 @@ public class TESTING_pattern_GPP extends LinearOpMode {
                     } else if (twothreeoneShoot) {
                         spindex.setPosition(0.43);
                     }
+
+                    in_position = true;
+                    sensing = false;
                 } else if (color_detected.equals("Purple") && ballPickUp == 1 && !adjusted) {
                     spindex.setPosition(0.56);
                     ballPickUp = 2;
@@ -185,9 +188,10 @@ public class TESTING_pattern_GPP extends LinearOpMode {
                 kicker_continuous.setPower(0);
                 kicker_rotate.setPosition(0.3);
                 restart = true;
+                start = false;
             }
 
-            if(gamepad1.left_bumper){
+            if(gamepad1.left_bumper && !start){
                 if(!restart) {
                     spinToLaunch = false;
                     stopLaunchSequence = false;
@@ -236,6 +240,7 @@ public class TESTING_pattern_GPP extends LinearOpMode {
                 kicker_continuous.setPower(1);
                 kicker_rotate.setPosition(0.6);
                 rotate_state = 1;
+                wait_time = 0;
                 timer.reset();
 
                 in_position = false;
@@ -274,7 +279,7 @@ public class TESTING_pattern_GPP extends LinearOpMode {
                 } else if(threetwooneShoot){
                     spindex.setPosition(0);
                 } else if(twothreeoneShoot){
-                    spindex.setPosition(0.43);
+                    spindex.setPosition(0);
                     spinTime = 0.6;
                 }
                 current_state++;
