@@ -36,16 +36,16 @@ public class TESTING_intakeOnly extends LinearOpMode {
             }
 
             if(gamepad1.dpad_up){
-                spindex.setPosition(0);
+                spindex.setPosition(1);
             }
 
             if(gamepad1.dpad_right){
-                spindex.setPosition(0.43);
+                spindex.setPosition(0.1);
             }
 
 
             if(gamepad1.dpad_down){
-                spindex.setPosition(0.87);
+                spindex.setPosition(0.56);
             }
 
 

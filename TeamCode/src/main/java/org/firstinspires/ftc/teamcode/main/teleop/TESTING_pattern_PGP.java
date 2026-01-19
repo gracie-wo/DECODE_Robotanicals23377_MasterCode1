@@ -7,6 +7,7 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
@@ -34,8 +35,8 @@ public class TESTING_pattern_PGP extends LinearOpMode {
 //        LLResult llResult = limelight.getLatestResult();
 //        limelight.start();
 
-//        DcMotor intake = hardwareMap.dcMotor.get("intake");
-//        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        DcMotor intake = hardwareMap.dcMotor.get("intake");
+        intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         Servo spindex = hardwareMap.get(Servo.class, "spindex");
         NormalizedColorSensor sensor = hardwareMap.get(NormalizedColorSensor.class, "colorSensor");
@@ -50,7 +51,12 @@ public class TESTING_pattern_PGP extends LinearOpMode {
 
         ElapsedTime timer = new ElapsedTime();
 
+        //color sensor
+        int purple = 0;
+        int green = 0;
+
         //intake & spindex
+        int kicker_start = 0;
         boolean adjusted = false;
         int ballPickUp = 1;
         boolean onetwothreeShoot = false;
@@ -70,6 +76,7 @@ public class TESTING_pattern_PGP extends LinearOpMode {
         double spinTime = 0.4;
         boolean start = false;
         boolean restart = false;
+        boolean onlyKicker = false;
 
 
         telemetry.addData("Status", "Initialized");
@@ -82,48 +89,81 @@ public class TESTING_pattern_PGP extends LinearOpMode {
             NormalizedRGBA colors = sensor.getNormalizedColors();
             hue = JavaUtil.colorToHue(colors.toColor());
 
+            //run kicker quickly
+            if(kicker_start == 0){
+                timer.reset();
+                kicker_continuous.setPower(0.1);
+                kicker_rotate.setPosition(0.3);
+                kicker_start = 1;
+            }
+
+            if(kicker_start == 1 && timer.time() > 0.1){
+                kicker_continuous.setPower(0);
+                kicker_start = 2;
+            }
+
+//---------------------------------------GAMEPAD 1----------------------------------------
+            //intake & spindex
             if(hue < 245 && hue > 220){
-                color_detected = "Purple";
+                purple++;
                 telemetry.addData("Color Detected:", "Purple");
                 telemetry.update();
-                detected = true;
             } else if(hue > 120 && hue < 185){
-                color_detected = "Green";
+                green++;
                 telemetry.addData("Color Detected:", "Green");
                 telemetry.update();
-                detected = true;
             } else {
+                purple = 0;
+                green = 0;
                 color_detected = "None";
                 telemetry.addData("Color Detected:", "None");
                 telemetry.update();
                 detected = false;
             }
 
+            if(purple >= 10){
+                color_detected = "Purple";
+                detected = true;
+            }
+            if(green >= 10){
+                color_detected = "Green";
+                detected = true;
+            }
+
             if(gamepad1.y){
                 spindex.setPosition(0.1);
-//                intake.setPower();
+                intake.setPower(1);
                 ballPickUp = 1;
                 onetwothreeShoot = false;
                 twoonethreeShoot = false;
                 twothreeoneShoot = false;
                 adjusted = false;
                 sensing = true;
+                timer.reset();
+            }
+
+            if(gamepad1.x){
+                intake.setPower(0);
+            }
+
+            if(gamepad1.a){
+                intake.setPower(-1);
             }
 
             //green ball first
             if(sensing) {
-                if (color_detected.equals("Green") && ballPickUp == 1 && !adjusted) {
+                if (color_detected.equals("Green") && ballPickUp == 1 && !adjusted && timer.time() > 1) {
                     onetwothreeShoot = true;
                     adjusted = true;
                     spindex.setPosition(0.56);
                     ballPickUp = 2;
                     timer.reset();
-                } else if (adjusted && ballPickUp == 2 && detected && (timer.time() > 0.3)) {
+                } else if (adjusted && ballPickUp == 2 && detected && (timer.time() > 1)) {
                     spindex.setPosition(1);
                     ballPickUp = 3;
                     timer.reset();
-                } else if (ballPickUp == 3 && detected && (timer.time() > 0.3)) {
-                    //intake.setPower(-1)
+                } else if (ballPickUp == 3 && detected && (timer.time() > 1)) {
+                    intake.setPower(-1);
                     if (onetwothreeShoot) {
                         spindex.setPosition(0);
                     } else if (twoonethreeShoot) {
@@ -138,13 +178,13 @@ public class TESTING_pattern_PGP extends LinearOpMode {
                     spindex.setPosition(1);
                     ballPickUp = 2;
                     timer.reset();
-                } else if (color_detected.equals("Green") && ballPickUp == 2 && !adjusted && (timer.time() > 0.3)) {
+                } else if (color_detected.equals("Green") && ballPickUp == 2 && !adjusted && (timer.time() > 1)) {
                     twoonethreeShoot = true;
                     adjusted = true;
                     spindex.setPosition(0.56);
                     ballPickUp = 3;
                     timer.reset();
-                } else if (color_detected.equals("Purple") && ballPickUp == 2 && !adjusted && (timer.time() > 0.3)) {
+                } else if (color_detected.equals("Purple") && ballPickUp == 2 && !adjusted && (timer.time() > 1)) {
                     twothreeoneShoot = true;
                     adjusted = true;
                     spindex.setPosition(0.56);
@@ -154,35 +194,65 @@ public class TESTING_pattern_PGP extends LinearOpMode {
             }
 
             if(gamepad1.dpad_up){
-                spindex.setPosition(0);
+                sensing = false;
+                spindex.setPosition(1);
             }
 
             if(gamepad1.dpad_right){
-                spindex.setPosition(0.43);
+                sensing = false;
+                spindex.setPosition(0.1);
             }
 
 
             if(gamepad1.dpad_down){
+                sensing = false;
+                spindex.setPosition(0.56);
+            }
+
+            //intake position
+            if(gamepad1.dpad_left){
+                sensing = false;
+                //MAYBE CHANGE AKS!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                onetwothreeShoot = true;
+                spindex.setPosition(0);
+            }
+
+//-------------------------------GAMEPAD 2--------------------------------------------------
+            //MANUAL launch positions
+            if(gamepad2.dpad_up){
+                spindex.setPosition(0);
+            }
+
+            if(gamepad2.dpad_right){
+                spindex.setPosition(0.43);
+            }
+
+
+            if(gamepad2.dpad_down){
                 spindex.setPosition(0.87);
             }
 
-            if(gamepad1.right_bumper){
-                if(onetwothreeShoot){
-                    telemetry.addData("Shoot", "one two three");
-                } else if(twoonethreeShoot){
-                    telemetry.addData("Shoot", "two one three");
-                } else if(twothreeoneShoot){
-                    telemetry.addData("Shoot", "two three one");
-                }
-
-                telemetry.update();
-                onetwothreeShoot = false;
-                twoonethreeShoot = false;
-                twothreeoneShoot = false;
-                adjusted = false;
+            //intake position
+            if(gamepad2.dpad_left){
+                spindex.setPosition(1);
             }
 
-            if(gamepad1.dpad_left){
+            //MANUAL KICKER
+            if(gamepad2.y){
+                kicker_continuous.setPower(1);
+                kicker_rotate.setPosition(0.6);
+                onlyKicker = true;
+                timer.reset();
+            }
+
+            if(onlyKicker && timer.time() > 0.5){
+                kicker_continuous.setPower(0);
+                kicker_rotate.setPosition(0.3);
+                onlyKicker = false;
+            }
+
+            //stop auto launch sequence
+            if(gamepad2.a){
                 stopLaunchSequence = true;
                 kicker_continuous.setPower(0);
                 kicker_rotate.setPosition(0.3);
@@ -190,7 +260,7 @@ public class TESTING_pattern_PGP extends LinearOpMode {
                 start = false;
             }
 
-            if(gamepad1.left_bumper && !start){
+            if(gamepad2.b && !start){
                 if(!restart) {
                     spinToLaunch = false;
                     stopLaunchSequence = false;
@@ -200,6 +270,10 @@ public class TESTING_pattern_PGP extends LinearOpMode {
                     end_state = false;
                     spinTime = 0.4;
                     start = true;
+
+                    if(!onetwothreeShoot || !twoonethreeShoot || !twothreeoneShoot){
+                        onetwothreeShoot = true;
+                    }
 
                     if (!in_position) {
                         if (onetwothreeShoot) {
