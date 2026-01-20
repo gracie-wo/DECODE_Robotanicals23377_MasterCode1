@@ -21,6 +21,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 
+import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
 
 import java.util.List;
@@ -42,7 +43,7 @@ public class TESTING_limelightAuto extends LinearOpMode {
     public class Limelight{
         public Limelight(HardwareMap hardwareMap){
             limelight = hardwareMap.get(Limelight3A.class, "limelight");
-            limelight.pipelineSwitch(0);
+            limelight.pipelineSwitch(2);
             llResult = limelight.getLatestResult();
             limelight.start();
         }
@@ -57,6 +58,14 @@ public class TESTING_limelightAuto extends LinearOpMode {
                     int tagId = 21;
 
                     if (llResult != null && llResult.isValid()) {
+                        Pose3D botPose = llResult.getBotpose_MT2();
+                        telemetry.addData("Distance", getDistanceFromTags(llResult.getTa()));
+                        telemetry.addData("Tx", llResult.getTx());
+                        telemetry.addData("Ty", llResult.getTy());
+                        telemetry.addData("Ta", llResult.getTa());
+                        telemetry.addData("BotPose", botPose.toString());
+//                      telemetry.addData("Yaw", botPose.getOrientation().getYaw());
+                        telemetry.update();
                         List<LLResultTypes.FiducialResult> fiducials = llResult.getFiducialResults();
 
                         for (LLResultTypes.FiducialResult fiducial : fiducials) {
@@ -70,6 +79,7 @@ public class TESTING_limelightAuto extends LinearOpMode {
                             } else if (tagId == 23) {
                                 telemetry.addData("Detected Tag ID", "PPG");
                             }
+
 
                             telemetry.update();
                         }
@@ -431,7 +441,7 @@ public class TESTING_limelightAuto extends LinearOpMode {
         //CHANGE SCALE NUM (CALCULATE)
 
         double scale = 29280.39;
-        double distance = Math.sqrt(scale/ta);
+        double distance = Math.sqrt(scale/ta) ;
         return distance;
     }
 

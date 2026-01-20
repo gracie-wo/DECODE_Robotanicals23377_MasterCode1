@@ -15,14 +15,13 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
-@Disabled
 @TeleOp(name = "LimeLight distsance", group = "Tele Op")
 public class TESTING_distancepower extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
         Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight.pipelineSwitch(1);
+        limelight.pipelineSwitch(2);
         LLResult llResult = limelight.getLatestResult();
 
         DcMotor launcher = hardwareMap.dcMotor.get("launcher");
@@ -141,8 +140,8 @@ public class TESTING_distancepower extends LinearOpMode {
     public double getDistanceFromTags(double ta){
         //CHANGE SCALE NUM (CALCULATE)
 
-        double scale = 29280.39;
-        double distance = Math.sqrt(scale/ta);
+        double scale = 29280.39; //OLD VALUE 14336.73
+        double distance = Math.sqrt(scale/ta) ; //Figure out how much
         return distance;
     }
 

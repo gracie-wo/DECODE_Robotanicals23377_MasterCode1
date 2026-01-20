@@ -1,7 +1,6 @@
 package org.firstinspires.ftc.teamcode.main.teleop;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
-import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -12,14 +11,15 @@ import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.JavaUtil;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.GoBildaPinpointDriver;
 
-import java.util.List;
-
-@TeleOp(name = "PPG Color Sensor", group = "testing")
-public class TESTING_pattern_PPG extends LinearOpMode {
+@TeleOp(name = "Red GPP", group = "Main")
+public class RED_GPP_main extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         IMU imu = hardwareMap.get(IMU.class, "imu");
@@ -30,10 +30,19 @@ public class TESTING_pattern_PPG extends LinearOpMode {
         // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
         imu.initialize(parameters);
 
-//        Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
-//        limelight.pipelineSwitch(0);
-//        LLResult llResult = limelight.getLatestResult();
-//        limelight.start();
+        Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
+        limelight.pipelineSwitch(2);
+        LLResult llResult = limelight.getLatestResult();
+        limelight.start();
+
+        VoltageSensor controlHubVoltageSensor;
+        controlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
+        double voltChange = voltSpeed(controlHubVoltageSensor);
+
+        GoBildaPinpointDriver odo = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+//OFFSETS NEED TO BE CHANGED
+        odo.setOffsets(44, 60.2, DistanceUnit.MM);
+
 
         DcMotor intake = hardwareMap.dcMotor.get("intake");
         intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -46,12 +55,12 @@ public class TESTING_pattern_PPG extends LinearOpMode {
         Servo kicker_rotate = hardwareMap.get(Servo.class, "kicker1");
         CRServo kicker_continuous = hardwareMap.get(CRServo.class, "kicker2");
 
-//        DcMotor launcher = hardwareMap.dcMotor.get("launcher");
-//        launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        DcMotor launcher = hardwareMap.dcMotor.get("launcher");
+        launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         ElapsedTime timer = new ElapsedTime();
 
-        //color detection
+        //color sensor
         int green = 0;
         int purple = 0;
 
@@ -61,13 +70,13 @@ public class TESTING_pattern_PPG extends LinearOpMode {
         int ballPickUp = 1;
         boolean onetwothreeShoot = false;
         boolean threetwooneShoot = false;
-        boolean onethreetwoShoot = false;
+        boolean twothreeoneShoot = false;
         boolean detected = false;
         boolean sensing = false;
 
         //launch spindex
         boolean in_position = false;
-        int spinToLaunch = 0;
+        boolean spinToLaunch = false;
         boolean stopLaunchSequence = false;
         int rotate_state = 0;
         int current_state = 0;
@@ -76,8 +85,10 @@ public class TESTING_pattern_PPG extends LinearOpMode {
         double spinTime = 0.4;
         boolean start = false;
         boolean restart = false;
-        boolean onlyKicker = false;
+        boolean onlyKicker= false;
 
+        //launching
+        boolean launchDistanceChange = false;
 
 
         telemetry.addData("Status", "Initialized");
@@ -137,7 +148,7 @@ public class TESTING_pattern_PPG extends LinearOpMode {
                 ballPickUp = 1;
                 onetwothreeShoot = false;
                 threetwooneShoot = false;
-                onethreetwoShoot = false;
+                twothreeoneShoot = false;
                 adjusted = false;
                 sensing = true;
                 timer.reset();
@@ -151,10 +162,10 @@ public class TESTING_pattern_PPG extends LinearOpMode {
                 intake.setPower(-1);
             }
 
-            //green ball first
             if(sensing) {
+                //green ball first
                 if (color_detected.equals("Green") && ballPickUp == 1 && !adjusted && timer.time() > 1) {
-                    threetwooneShoot = true;
+                    onetwothreeShoot = true;
                     adjusted = true;
                     spindex.setPosition(0.56);
                     ballPickUp = 2;
@@ -169,26 +180,24 @@ public class TESTING_pattern_PPG extends LinearOpMode {
                         spindex.setPosition(0);
                     } else if (threetwooneShoot) {
                         spindex.setPosition(0.87);
-                    } else if (onethreetwoShoot) {
-                        spindex.setPosition(0);
+                    } else if (twothreeoneShoot) {
+                        spindex.setPosition(0.43);
                     }
 
                     in_position = true;
                     sensing = false;
-                    purple = 0;
-                    green = 0;
                 } else if (color_detected.equals("Purple") && ballPickUp == 1 && !adjusted) {
                     spindex.setPosition(0.56);
                     ballPickUp = 2;
                     timer.reset();
                 } else if (color_detected.equals("Green") && ballPickUp == 2 && !adjusted && (timer.time() > 1)) {
-                    onetwothreeShoot = true;
+                    threetwooneShoot = true;
                     adjusted = true;
                     spindex.setPosition(0.1);
                     ballPickUp = 3;
                     timer.reset();
                 } else if (color_detected.equals("Purple") && ballPickUp == 2 && !adjusted && (timer.time() > 1)) {
-                    onethreetwoShoot = true;
+                    twothreeoneShoot = true;
                     adjusted = true;
                     spindex.setPosition(0.1);
                     ballPickUp = 3;
@@ -206,7 +215,6 @@ public class TESTING_pattern_PPG extends LinearOpMode {
                 spindex.setPosition(0.1);
             }
 
-
             if(gamepad1.dpad_down){
                 sensing = false;
                 spindex.setPosition(0.56);
@@ -215,7 +223,6 @@ public class TESTING_pattern_PPG extends LinearOpMode {
             //intake position
             if(gamepad1.dpad_left){
                 sensing = false;
-    //MAYBE CHANGE AKS!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 onetwothreeShoot = true;
                 spindex.setPosition(0);
             }
@@ -240,7 +247,7 @@ public class TESTING_pattern_PPG extends LinearOpMode {
                 spindex.setPosition(1);
             }
 
-            //MANUAL KICKER
+            //manual kicker
             if(gamepad2.y){
                 kicker_continuous.setPower(1);
                 kicker_rotate.setPosition(0.6);
@@ -254,6 +261,26 @@ public class TESTING_pattern_PPG extends LinearOpMode {
                 onlyKicker = false;
             }
 
+            if(gamepad2.right_bumper){
+                launchDistanceChange = true;
+                //may need to delete
+                voltChange = voltSpeed(controlHubVoltageSensor);
+            }
+
+            if(gamepad2.left_bumper){
+                in_position = false;
+                launchDistanceChange = false;
+                launcher.setPower(0);
+            }
+
+            if(launchDistanceChange && llResult != null && llResult.isValid()){
+                double distance = getDistanceFromTags(llResult.getTa());
+//CHAGNGEN -20 DISTANCE AFTER CLAIBRATION-------------------------------------------------------------------------
+                double launchPower = (0.0025 * (distance)) + voltChange;
+                launcher.setPower(launchPower);
+            } else if(launchDistanceChange){
+                launcher.setPower((0.0025 * 185) + voltChange);
+            }
 
             //stop auto launch sequence
             if(gamepad2.a){
@@ -264,11 +291,10 @@ public class TESTING_pattern_PPG extends LinearOpMode {
                 start = false;
             }
 
-
-            //start auto launch sequence
+            //START AUTO LAUNCH SEQUENCE
             if(gamepad2.b && !start){
                 if(!restart) {
-                    spinToLaunch = 0;
+                    spinToLaunch = false;
                     stopLaunchSequence = false;
                     rotate_state = 0;
                     current_state = 0;
@@ -277,7 +303,7 @@ public class TESTING_pattern_PPG extends LinearOpMode {
                     spinTime = 0.4;
                     start = true;
 
-                    if(!onetwothreeShoot || !onethreetwoShoot || !threetwooneShoot){
+                    if(!onetwothreeShoot || !twothreeoneShoot || !threetwooneShoot){
                         onetwothreeShoot = true;
                     }
 
@@ -286,11 +312,11 @@ public class TESTING_pattern_PPG extends LinearOpMode {
                             spindex.setPosition(0);
                         } else if (threetwooneShoot) {
                             spindex.setPosition(0.87);
-                        } else if (onethreetwoShoot) {
-                            spindex.setPosition(0);
+                        } else if (twothreeoneShoot) {
+                            spindex.setPosition(0.43);
                         }
 
-                        spinToLaunch = 1;
+                        spinToLaunch = true;
                         timer.reset();
                     }
                 } else {
@@ -302,8 +328,8 @@ public class TESTING_pattern_PPG extends LinearOpMode {
                 }
             }
 
-            if(spinToLaunch == 1 && timer.time() > 0.6){
-                spinToLaunch = 0;
+            if(spinToLaunch && timer.time() > 0.6){
+                spinToLaunch = false;
                 in_position = true;
             }
 
@@ -312,8 +338,8 @@ public class TESTING_pattern_PPG extends LinearOpMode {
                     spindex.setPosition(0);
                 } else if(threetwooneShoot){
                     spindex.setPosition(0.87);
-                } else if(onethreetwoShoot){
-                    spindex.setPosition(0);
+                } else if(twothreeoneShoot){
+                    spindex.setPosition(0.43);
                 }
 
                 kicker_continuous.setPower(1);
@@ -343,9 +369,8 @@ public class TESTING_pattern_PPG extends LinearOpMode {
                     spindex.setPosition(0.43);
                 } else if(threetwooneShoot){
                     spindex.setPosition(0.43);
-                } else if (onethreetwoShoot){
+                } else if (twothreeoneShoot){
                     spindex.setPosition(0.87);
-                    spinTime = 0.6;
                 }
                 timer.reset();
                 current_state++;
@@ -358,8 +383,9 @@ public class TESTING_pattern_PPG extends LinearOpMode {
                     spindex.setPosition(0.87);
                 } else if(threetwooneShoot){
                     spindex.setPosition(0);
-                } else if(onethreetwoShoot){
-                    spindex.setPosition(0.43);
+                } else if(twothreeoneShoot){
+                    spindex.setPosition(0);
+                    spinTime = 0.6;
                 }
                 current_state++;
                 end_state = true;
@@ -377,4 +403,36 @@ public class TESTING_pattern_PPG extends LinearOpMode {
         }
 
     }
+
+    public double getDistanceFromTags(double ta){
+        //CHANGE SCALE NUM (CALCULATE)
+
+        double scale = 29280.39;
+        double distance = Math.sqrt(scale/ta);
+        return distance;
+    }
+
+    public double voltSpeed(VoltageSensor controlHubVoltageSensor){
+        double voltage = controlHubVoltageSensor.getVoltage();
+
+        //TEMP FIX TEST PLS
+        if(voltage >= 13.5){
+            return 0;
+        } else if(voltage >= 13.1){
+            return 0.05;
+        } else if (voltage >= 12.6){
+            return 0.1;
+        } else if (voltage >= 12.1){
+            return 0.125;
+        } else if (voltage >= 11.6){
+            return 0.15;
+        } else if (voltage >= 11.1){
+            return 0.175;
+        } else if (voltage >= 10.6){
+            return 0.2;
+        } else {
+            return 0.05;
+        }
+    }
+
 }
