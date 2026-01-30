@@ -66,16 +66,21 @@ public final class MecanumDrive {
                 RevHubOrientationOnRobot.UsbFacingDirection.RIGHT;
 
         // drive model parameters
-        public double inPerTick = 0.0030296654744372 * 0.75;
-        public double lateralInPerTick = 0.0021650917726142847;
-        public double trackWidthTicks = 7398.178115051982;
+        public double inPerTick = 0.002311804652506863171;
+        //0.0022873974332001
+        public double lateralInPerTick = 0.0016226153594712015;
+        //0.0015121741040969748
+        public double trackWidthTicks = 7466.468163002287;
+        //7483.729374109403
 
         // feedforward parameters (in tick units)
-        public double kS = 1.0772195513914862;
-        //0.9620551602716612
-        public double kV = 0.00038745626048273526;
+        public double kS = 1.1806562919956192;
+        //1.1934203836096997
+        public double kV = 0.0003849776954178278;
+        //0.0003777019548785076
 
         public double kA = 0.00012;
+        //0.00012
 
         // path profile parameters (in inches)
         public double maxWheelVel = 50;
@@ -87,13 +92,16 @@ public final class MecanumDrive {
         public double maxAngAccel = Math.PI;
 
         // path controller gains
-        //4
-        public double axialGain = 3.5;
-        //1
+
+        public double axialGain = 3.4;
+        //3.5
         public double lateralGain = 1.575;
+        //1.575
         public double headingGain = 0.75; // shared with turn
+        //0.78
 
         public double axialVelGain = 0.3;
+        //0.3
         public double lateralVelGain = 0.0;
         public double headingVelGain = 0.0; // shared with turn
     }
@@ -224,7 +232,7 @@ public final class MecanumDrive {
     }
 
     public MecanumDrive(HardwareMap hardwareMap, Pose2d pose) {
-        LynxFirmware.throwIfModulesAreOutdated(hardwareMap);
+//        LynxFirmware.throwIfModulesAreOutdated(hardwareMap);
 
         for (LynxModule module : hardwareMap.getAll(LynxModule.class)) {
             module.setBulkCachingMode(LynxModule.BulkCachingMode.AUTO);

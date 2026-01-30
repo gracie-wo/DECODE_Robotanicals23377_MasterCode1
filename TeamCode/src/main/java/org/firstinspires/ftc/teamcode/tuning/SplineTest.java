@@ -11,7 +11,6 @@ import org.firstinspires.ftc.teamcode.MecanumDrive;
 import org.firstinspires.ftc.teamcode.TankDrive;
 
 
-@TeleOp(name = "Spline Test", group = "RoadRunner")
 public final class SplineTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {

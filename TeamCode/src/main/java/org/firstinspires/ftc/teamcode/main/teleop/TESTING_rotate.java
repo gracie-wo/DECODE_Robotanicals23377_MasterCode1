@@ -24,12 +24,12 @@ public class TESTING_rotate extends LinearOpMode {
 
             if(gamepad1.right_bumper){
                 //red
-                rotator.setPosition(0.57);
+                rotator.setPosition(0.4);
             }
 
             if(gamepad1.left_bumper){
                 //blue
-               rotator.setPosition(0.38);
+               rotator.setPosition(0.8);
             }
 
 

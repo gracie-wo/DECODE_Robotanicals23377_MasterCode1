@@ -7,9 +7,13 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorControllerEx;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.robotcore.hardware.NormalizedColorSensor;
 import com.qualcomm.robotcore.hardware.NormalizedRGBA;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -26,7 +30,7 @@ public class RED_PPG_main extends LinearOpMode {
         // Adjust the orientation parameters to match your robot
         IMU.Parameters parameters = new IMU.Parameters(new RevHubOrientationOnRobot(
                 RevHubOrientationOnRobot.LogoFacingDirection.UP,
-                RevHubOrientationOnRobot.UsbFacingDirection.RIGHT));
+                RevHubOrientationOnRobot.UsbFacingDirection.LEFT));
         // Without this, the REV Hub's orientation is assumed to be logo up / USB forward
         imu.initialize(parameters);
 
@@ -56,6 +60,24 @@ public class RED_PPG_main extends LinearOpMode {
 
         DcMotor launcher = hardwareMap.dcMotor.get("launcher");
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        Servo rotator = hardwareMap.get(Servo.class, "rotator");
+
+        //accel forward to target speed
+        final double NEWR_P = 2;
+        //ability to change intertia (change direction
+        final double NEWR_I = 0.2;
+        //jerk lmao
+        final double NEWR_D = 0.7;
+        //idek
+        final double NEWR_F = 20.0;
+
+        DcMotorControllerEx motorControllerExR = (DcMotorControllerEx)launcher.getController();
+        int motorIndexR = ((DcMotorEx)launcher).getPortNumber();
+
+        PIDFCoefficients pidfNewR = new PIDFCoefficients(NEWR_P, NEWR_I, NEWR_D, NEWR_F);
+        motorControllerExR.setPIDFCoefficients(motorIndexR, DcMotor.RunMode.RUN_USING_ENCODER, pidfNewR);
+
 
         ElapsedTime timer = new ElapsedTime();
 
@@ -88,8 +110,23 @@ public class RED_PPG_main extends LinearOpMode {
 
         //launching
         boolean launchDistanceChange = false;
+        int secondThird = 0;
 
+        boolean camera_on = false;
+        double launchPosition = 0.4;
 
+        DcMotor frontLeft = hardwareMap.dcMotor.get("frontLeft");
+        DcMotor backLeft = hardwareMap.dcMotor.get("backLeft");
+        DcMotor frontRight = hardwareMap.dcMotor.get("frontRight");
+        DcMotor backRight = hardwareMap.dcMotor.get("backRight");
+
+        frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        backLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+        backRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
+
+        frontRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        backRight.setDirection(DcMotorSimple.Direction.REVERSE);
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -115,6 +152,45 @@ public class RED_PPG_main extends LinearOpMode {
             }
 
 //---------------------------------------GAMEPAD 1----------------------------------------
+            double y = gamepad1.left_stick_y; // Remember, Y stick value is reversed
+            double x = -gamepad1.left_stick_x;
+            double rx = -gamepad1.right_stick_x;
+
+
+            // This button choice was made so that it is hard to hit on accident,
+            // it can be freely changed based on preference.
+            // The equivalent button is start on Xbox-style controllers.
+            if (gamepad1.options) {
+                imu.resetYaw();
+            }
+
+            if (gamepad2.options){
+                imu.resetYaw();
+            }
+
+            double botHeading = 0.0;
+
+            // Rotate the movement direction counter to the bot's rotation
+            double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
+            double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
+
+            rotX = rotX * 1.1;  // Counteract imperfect strafing
+
+            // Denominator is the largest motor power (absolute value) or 1
+            // This ensures all the powers maintain the same ratio,
+            // but only if at least one is out of the range [-1, 1]
+            double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
+            double frontLeftPower = (rotY + rotX + rx) / denominator;
+            double backLeftPower = (rotY - rotX + rx) / denominator;
+            double frontRightPower = (rotY - rotX - rx) / denominator;
+            double backRightPower = (rotY + rotX - rx) / denominator;
+
+            frontLeft.setPower(frontLeftPower* 1);
+            backLeft.setPower(backLeftPower* 1);
+            frontRight.setPower(frontRightPower* 1);
+            backRight.setPower(backRightPower* 1);
+
+
             //intake & spindex
             if(hue < 245 && hue > 220){
                 purple++;
@@ -152,6 +228,36 @@ public class RED_PPG_main extends LinearOpMode {
                 adjusted = false;
                 sensing = true;
                 timer.reset();
+            }
+
+            //turn camera on/off
+            if(gamepad1.right_bumper){
+                in_position = false;
+                rotator.setPosition(0.4);
+                camera_on = true;
+            }
+
+            if(gamepad1.left_bumper){
+                in_position = false;
+                camera_on = false;
+                telemetry.clear();
+                telemetry.addData("Camera:", "Off");
+                telemetry.update();
+            }
+
+
+            if(camera_on && llResult.getTx() < -5){
+                if(launchPosition > 0){
+                    launchPosition -= 0.002;
+                    rotator.setPosition(launchPosition);
+                }
+            }
+
+            if(camera_on && llResult.getTx() > 5){
+                if(launchPosition < 0.8){
+                    launchPosition += 0.002;
+                    rotator.setPosition(launchPosition);
+                }
             }
 
             if(gamepad1.x){
@@ -279,14 +385,18 @@ public class RED_PPG_main extends LinearOpMode {
 
             if(launchDistanceChange && llResult != null && llResult.isValid()){
                 double distance = getDistanceFromTags(llResult.getTa());
+                double launchPower = 0;
 //CHAGNGEN -20 DISTANCE AFTER CLAIBRATION-------------------------------------------------------------------------
-                double launchPower = (0.0025 * (distance)) + voltChange;
+                if(secondThird <= 1){
+                    launchPower = (0.0025 * (distance)) + voltChange;
+                } else {
+                    launchPower = (0.0025 * distance) + voltChange + 0.1;
+                }
                 launcher.setPower(launchPower);
             } else if(launchDistanceChange){
-                launcher.setPower((0.0025 * 185) + voltChange);
+                launcher.setPower((0.0025 * 175) + voltChange);
             }
 
-            //MANUAL OVERRIDE TO LAUNCH ON
 
             //stop auto launch sequence
             if(gamepad2.a){
@@ -295,6 +405,8 @@ public class RED_PPG_main extends LinearOpMode {
                 kicker_rotate.setPosition(0.3);
                 restart = true;
                 start = false;
+
+                secondThird = 0;
             }
 
 
@@ -309,8 +421,9 @@ public class RED_PPG_main extends LinearOpMode {
                     end_state = false;
                     spinTime = 0.4;
                     start = true;
+                    secondThird = 0;
 
-                    if(!onetwothreeShoot || !onethreetwoShoot || !threetwooneShoot){
+                    if(!onetwothreeShoot && !onethreetwoShoot && !threetwooneShoot){
                         onetwothreeShoot = true;
                     }
 
@@ -349,6 +462,8 @@ public class RED_PPG_main extends LinearOpMode {
                     spindex.setPosition(0);
                 }
 
+                secondThird++;
+
                 kicker_continuous.setPower(1);
                 kicker_rotate.setPosition(0.6);
                 rotate_state = 1;
@@ -383,6 +498,8 @@ public class RED_PPG_main extends LinearOpMode {
                 timer.reset();
                 current_state++;
                 wait_time = 1;
+
+                secondThird++;
             }
 
             if(!stopLaunchSequence && current_state == 3 && timer.time() > 0.3){
@@ -394,6 +511,9 @@ public class RED_PPG_main extends LinearOpMode {
                 } else if(onethreetwoShoot){
                     spindex.setPosition(0.43);
                 }
+
+                secondThird++;
+
                 current_state++;
                 end_state = true;
                 timer.reset();
@@ -422,23 +542,35 @@ public class RED_PPG_main extends LinearOpMode {
     public double voltSpeed(VoltageSensor controlHubVoltageSensor){
         double voltage = controlHubVoltageSensor.getVoltage();
 
-        //TEMP FIX TEST PLS
-        if(voltage >= 13.5){
+        double power = ((-0.0600978 * voltage) + 0.819191);
+
+//        double power = (-0.00979891 * Math.pow(voltage, 2)) + (0.177689 * voltage) - 0.590611;
+
+        if(power < 0){
             return 0;
-        } else if(voltage >= 13.1){
-            return 0.05;
-        } else if (voltage >= 12.6){
-            return 0.1;
-        } else if (voltage >= 12.1){
-            return 0.125;
-        } else if (voltage >= 11.6){
-            return 0.15;
-        } else if (voltage >= 11.1){
-            return 0.175;
-        } else if (voltage >= 10.6){
-            return 0.2;
         } else {
-            return 0.05;
+            return power;
         }
+
+//        return (-0.00777925 * Math.pow(voltage, 2)) + (0.12726 * voltage) -0.301808;
+
+//        //TEMP FIX TEST PLS
+//        if(voltage >= 13.5){
+//            return 0;
+//        } else if(voltage >= 13.0){
+//            return 0.04;
+//        } else if (voltage >= 12.6){
+//            return 0.1;
+//        } else if (voltage >= 12.1){
+//            return 0.125;
+//        } else if (voltage >= 11.6){
+//            return 0.15;
+//        } else if (voltage >= 11.1){
+//            return 0.175;
+//        } else if (voltage >= 10.6){
+//            return 0.2;
+//        } else {
+//            return 0.05;
+//        }
     }
 }

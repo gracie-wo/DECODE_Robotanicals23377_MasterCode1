@@ -14,7 +14,6 @@ import com.acmerobotics.dashboard.config.Config;
 
 
 @Config
-@Autonomous(name = "PID Test", group = "RoadRunner")
 public class PIDTuning extends LinearOpMode{
     DcMotorEx flywheel;
 

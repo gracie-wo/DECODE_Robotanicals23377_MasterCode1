@@ -12,7 +12,6 @@ import org.firstinspires.ftc.teamcode.ThreeDeadWheelLocalizer;
 import org.firstinspires.ftc.teamcode.TwoDeadWheelLocalizer;
 
 
-@TeleOp(name = "Manual Feedback Tuner", group = "RoadRunner")
 public final class ManualFeedbackTuner extends LinearOpMode {
     public static double DISTANCE = 64;
 

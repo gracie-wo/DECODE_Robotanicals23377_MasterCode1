@@ -73,9 +73,13 @@ public class BlueMain extends LinearOpMode {
         DcMotor launcher = hardwareMap.dcMotor.get("launcher");
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+        //accel forward to target speed
         final double NEWR_P = 5.0;
+        //ability to change intertia (change direction
         final double NEWR_I = 0.2;
+        //jerk lmao
         final double NEWR_D = 0.7;
+        //idek
         final double NEWR_F = 11.0;
 
         DcMotorControllerEx motorControllerExR = (DcMotorControllerEx)launcher.getController();

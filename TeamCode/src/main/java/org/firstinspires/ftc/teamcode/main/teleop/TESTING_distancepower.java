@@ -96,7 +96,7 @@ public class TESTING_distancepower extends LinearOpMode {
 
 
             if(gamepad1.dpad_right){
-                launcher.setPower(0.45);
+                launcher.setPower(1);
             }
 
             if (gamepad1.dpad_down) {
@@ -112,7 +112,7 @@ public class TESTING_distancepower extends LinearOpMode {
                 kicker_continuous.setPower(1);
                 timer.reset();
                 kicker_rotate.setPosition(0.6);
-                omg = 1;
+//                omg = 1;
             }
 
             if(omg == 1 && timer.time() > 0.8){
