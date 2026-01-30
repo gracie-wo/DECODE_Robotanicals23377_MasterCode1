@@ -560,6 +560,10 @@ public class RED_PGP_main extends LinearOpMode {
             power = ((-0.0600978 * voltage) + 0.844191);
         }
 
+        //-0.0432592x+0.635392 combo for both
+        //connects 12.4 and 13.7
+        //might need to change to connect 12.4 and 13.4 or smth like that
+
 //        double power = (-0.00979891 * Math.pow(voltage, 2)) + (0.177689 * voltage) - 0.590611;
 
         if(power < 0){
