@@ -65,20 +65,20 @@ public class RED_PGP_main extends LinearOpMode {
 
         Servo rotator = hardwareMap.get(Servo.class, "rotator");
 
-//        //accel forward to target speed
-//        final double NEWR_P = 2;
-//        //ability to change intertia (change direction
-//        final double NEWR_I = 0.2;
-//        //jerk lmao
-//        final double NEWR_D = 0.7;
-//        //idek
-//        final double NEWR_F = 20.0;
-//
-//        DcMotorControllerEx motorControllerExR = (DcMotorControllerEx)launcher.getController();
-//        int motorIndexR = ((DcMotorEx)launcher).getPortNumber();
-//
-//        PIDFCoefficients pidfNewR = new PIDFCoefficients(NEWR_P, NEWR_I, NEWR_D, NEWR_F);
-//        motorControllerExR.setPIDFCoefficients(motorIndexR, DcMotor.RunMode.RUN_USING_ENCODER, pidfNewR);
+        //accel forward to target speed
+        final double NEWR_P = 2;
+        //ability to change intertia (change direction
+        final double NEWR_I = 0.2;
+        //jerk lmao
+        final double NEWR_D = 0.7;
+        //idek
+        final double NEWR_F = 20.0;
+
+        DcMotorControllerEx motorControllerExR = (DcMotorControllerEx)launcher.getController();
+        int motorIndexR = ((DcMotorEx)launcher).getPortNumber();
+
+        PIDFCoefficients pidfNewR = new PIDFCoefficients(NEWR_P, NEWR_I, NEWR_D, NEWR_F);
+        motorControllerExR.setPIDFCoefficients(motorIndexR, DcMotor.RunMode.RUN_USING_ENCODER, pidfNewR);
 
         ElapsedTime timer = new ElapsedTime();
 
@@ -115,6 +115,7 @@ public class RED_PGP_main extends LinearOpMode {
 
         boolean camera_on = false;
         double launchPosition = 0.4;
+        double launchPower = 0;
 
         DcMotor frontLeft = hardwareMap.dcMotor.get("frontLeft");
         DcMotor backLeft = hardwareMap.dcMotor.get("backLeft");
@@ -385,7 +386,7 @@ public class RED_PGP_main extends LinearOpMode {
 
             if(launchDistanceChange && llResult != null && llResult.isValid()){
                 double distance = getDistanceFromTags(llResult.getTa());
-                double launchPower = 0;
+                launchPower = 0;
 //CHAGNGEN -20 DISTANCE AFTER CLAIBRATION-------------------------------------------------------------------------
                 if(secondThird <= 1){
                     launchPower = (0.0025 * (distance)) + voltChange;
@@ -409,6 +410,9 @@ public class RED_PGP_main extends LinearOpMode {
             }
 
             if(gamepad2.b && !start){
+                telemetry.addData("Launch Power: ", launchPower);
+                telemetry.update();
+
                 if(!restart) {
                     spinToLaunch = false;
                     stopLaunchSequence = false;
@@ -539,7 +543,7 @@ public class RED_PGP_main extends LinearOpMode {
     public double voltSpeed(VoltageSensor controlHubVoltageSensor){
         double voltage = controlHubVoltageSensor.getVoltage();
 
-        double power = ((-0.0600978 * voltage) + 0.819191);
+        double power = ((-0.0630787 * voltage) + 0.869676);
 
 //        double power = (-0.00979891 * Math.pow(voltage, 2)) + (0.177689 * voltage) - 0.590611;
 
