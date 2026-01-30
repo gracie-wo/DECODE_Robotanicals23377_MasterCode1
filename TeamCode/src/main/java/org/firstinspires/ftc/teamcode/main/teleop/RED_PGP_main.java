@@ -116,6 +116,7 @@ public class RED_PGP_main extends LinearOpMode {
         boolean camera_on = false;
         double launchPosition = 0.4;
         double launchPower = 0;
+        double distance = 0;
 
         DcMotor frontLeft = hardwareMap.dcMotor.get("frontLeft");
         DcMotor backLeft = hardwareMap.dcMotor.get("backLeft");
@@ -138,6 +139,8 @@ public class RED_PGP_main extends LinearOpMode {
         if (isStopRequested()) return;
 
         while (opModeIsActive()) {
+            llResult = limelight.getLatestResult();
+
             NormalizedRGBA colors = sensor.getNormalizedColors();
             hue = JavaUtil.colorToHue(colors.toColor());
 
@@ -197,17 +200,17 @@ public class RED_PGP_main extends LinearOpMode {
             //intake & spindex
             if(hue < 245 && hue > 220){
                 purple++;
-                telemetry.addData("Color Detected:", "Purple");
+//                telemetry.addData("Color Detected:", "Purple");
 //                telemetry.update();
             } else if(hue > 120 && hue < 185){
                 green++;
-                telemetry.addData("Color Detected:", "Green");
+//                telemetry.addData("Color Detected:", "Green");
 //                telemetry.update();
             } else {
                 purple = 0;
                 green = 0;
                 color_detected = "None";
-                telemetry.addData("Color Detected:", "None");
+//                telemetry.addData("Color Detected:", "None");
 //                telemetry.update();
                 detected = false;
             }
@@ -385,14 +388,19 @@ public class RED_PGP_main extends LinearOpMode {
             }
 
             if(launchDistanceChange && llResult != null && llResult.isValid()){
-                double distance = getDistanceFromTags(llResult.getTa());
-                launchPower = 0;
+                distance = getDistanceFromTags(llResult.getTa());
+
 //CHAGNGEN -20 DISTANCE AFTER CLAIBRATION-------------------------------------------------------------------------
                 if(secondThird <= 1){
                     launchPower = (0.0025 * (distance)) + voltChange;
+                } else if (secondThird == 2) {
+                    launchPower = (0.0025 * distance) + voltChange + 0.2;
                 } else {
-                    launchPower = (0.0025 * distance) + voltChange + 0.1;
+                    launchPower = (0.0025 * distance) + voltChange + 0.15;
                 }
+
+                telemetry.addData("Launch Power: ", launchPower);
+                telemetry.update();
                 launcher.setPower(launchPower);
             } else if(launchDistanceChange){
                 launcher.setPower((0.0025 * 175) + voltChange);
@@ -410,8 +418,8 @@ public class RED_PGP_main extends LinearOpMode {
             }
 
             if(gamepad2.b && !start){
-                telemetry.addData("Launch Power: ", launchPower);
-                telemetry.update();
+//                telemetry.addData("Launch Power: ", launchPower);
+//                telemetry.update();
 
                 if(!restart) {
                     spinToLaunch = false;
@@ -484,6 +492,7 @@ public class RED_PGP_main extends LinearOpMode {
                     kicker_continuous.setPower(0);
                     start = false;
                     restart = false;
+                    secondThird = 0;
                 }
             }
 
@@ -542,8 +551,13 @@ public class RED_PGP_main extends LinearOpMode {
 
     public double voltSpeed(VoltageSensor controlHubVoltageSensor){
         double voltage = controlHubVoltageSensor.getVoltage();
+        double power;
 
-        double power = ((-0.0630787 * voltage) + 0.869676);
+        if(voltage >= 12.6){
+            power = ((-0.0585 * voltage) + 0.844191);
+        } else {
+            power = ((-0.0600978 * voltage) + 0.844191);
+        }
 
 //        double power = (-0.00979891 * Math.pow(voltage, 2)) + (0.177689 * voltage) - 0.590611;
 

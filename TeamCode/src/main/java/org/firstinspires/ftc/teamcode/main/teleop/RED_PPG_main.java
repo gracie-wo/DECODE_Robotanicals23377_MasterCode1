@@ -135,6 +135,8 @@ public class RED_PPG_main extends LinearOpMode {
         if (isStopRequested()) return;
 
         while (opModeIsActive()) {
+            llResult = limelight.getLatestResult();
+
             NormalizedRGBA colors = sensor.getNormalizedColors();
             hue = JavaUtil.colorToHue(colors.toColor());
 
