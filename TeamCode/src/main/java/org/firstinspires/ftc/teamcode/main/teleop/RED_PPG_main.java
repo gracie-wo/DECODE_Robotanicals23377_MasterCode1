@@ -114,6 +114,8 @@ public class RED_PPG_main extends LinearOpMode {
 
         boolean camera_on = false;
         double launchPosition = 0.4;
+        double launchPower = 0;
+        double distance = 0;
 
         DcMotor frontLeft = hardwareMap.dcMotor.get("frontLeft");
         DcMotor backLeft = hardwareMap.dcMotor.get("backLeft");
@@ -139,6 +141,14 @@ public class RED_PPG_main extends LinearOpMode {
 
             NormalizedRGBA colors = sensor.getNormalizedColors();
             hue = JavaUtil.colorToHue(colors.toColor());
+
+            if(llResult != null && llResult.isValid()){
+                telemetry.addData("Tag", "Seen");
+                telemetry.update();
+            } else {
+                telemetry.addData("Tag", "NOT Seen");
+                telemetry.update();
+            }
 
             //run kicker quickly
             if(kicker_start == 0){
@@ -196,18 +206,18 @@ public class RED_PPG_main extends LinearOpMode {
             //intake & spindex
             if(hue < 245 && hue > 220){
                 purple++;
-                telemetry.addData("Color Detected:", "Purple");
-                telemetry.update();
+//                telemetry.addData("Color Detected:", "Purple");
+//                telemetry.update();
             } else if(hue > 120 && hue < 185){
                 green++;
-                telemetry.addData("Color Detected:", "Green");
-                telemetry.update();
+//                telemetry.addData("Color Detected:", "Green");
+//                telemetry.update();
             } else {
                 purple = 0;
                 green = 0;
                 color_detected = "None";
-                telemetry.addData("Color Detected:", "None");
-                telemetry.update();
+//                telemetry.addData("Color Detected:", "None");
+//                telemetry.update();
                 detected = false;
             }
 
@@ -334,7 +344,6 @@ public class RED_PPG_main extends LinearOpMode {
             //intake position
             if(gamepad1.dpad_left){
                 sensing = false;
-    //MAYBE CHANGE AKS!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 onetwothreeShoot = true;
                 spindex.setPosition(0);
             }
@@ -386,14 +395,16 @@ public class RED_PPG_main extends LinearOpMode {
             }
 
             if(launchDistanceChange && llResult != null && llResult.isValid()){
-                double distance = getDistanceFromTags(llResult.getTa());
-                double launchPower = 0;
-//CHAGNGEN -20 DISTANCE AFTER CLAIBRATION-------------------------------------------------------------------------
+                distance = getDistanceFromTags(llResult.getTa());
+
                 if(secondThird <= 1){
                     launchPower = (0.0025 * (distance)) + voltChange;
+                } else if (secondThird == 2) {
+                    launchPower = (0.0025 * distance) + voltChange + 0.2;
                 } else {
-                    launchPower = (0.0025 * distance) + voltChange + 0.1;
+                    launchPower = (0.0025 * distance) + voltChange + 0.15;
                 }
+
                 launcher.setPower(launchPower);
             } else if(launchDistanceChange){
                 launcher.setPower((0.0025 * 175) + voltChange);
@@ -485,6 +496,7 @@ public class RED_PPG_main extends LinearOpMode {
                     kicker_continuous.setPower(0);
                     start = false;
                     restart = false;
+                    secondThird = 0;
                 }
             }
 
@@ -543,36 +555,18 @@ public class RED_PPG_main extends LinearOpMode {
 
     public double voltSpeed(VoltageSensor controlHubVoltageSensor){
         double voltage = controlHubVoltageSensor.getVoltage();
+        double power;
 
-        double power = ((-0.0600978 * voltage) + 0.819191);
-
-//        double power = (-0.00979891 * Math.pow(voltage, 2)) + (0.177689 * voltage) - 0.590611;
+        if(voltage >= 12.6){
+            power = ((-0.0585 * voltage) + 0.844191);
+        } else {
+            power = ((-0.0600978 * voltage) + 0.844191);
+        }
 
         if(power < 0){
             return 0;
         } else {
             return power;
         }
-
-//        return (-0.00777925 * Math.pow(voltage, 2)) + (0.12726 * voltage) -0.301808;
-
-//        //TEMP FIX TEST PLS
-//        if(voltage >= 13.5){
-//            return 0;
-//        } else if(voltage >= 13.0){
-//            return 0.04;
-//        } else if (voltage >= 12.6){
-//            return 0.1;
-//        } else if (voltage >= 12.1){
-//            return 0.125;
-//        } else if (voltage >= 11.6){
-//            return 0.15;
-//        } else if (voltage >= 11.1){
-//            return 0.175;
-//        } else if (voltage >= 10.6){
-//            return 0.2;
-//        } else {
-//            return 0.05;
-//        }
     }
 }

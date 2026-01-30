@@ -144,6 +144,14 @@ public class RED_PGP_main extends LinearOpMode {
             NormalizedRGBA colors = sensor.getNormalizedColors();
             hue = JavaUtil.colorToHue(colors.toColor());
 
+            if(llResult != null && llResult.isValid()){
+                telemetry.addData("Tag", "Seen");
+                telemetry.update();
+            } else {
+                telemetry.addData("Tag", "NOT Seen");
+                telemetry.update();
+            }
+
             //run kicker quickly
             if(kicker_start == 0){
                 timer.reset();
@@ -248,7 +256,7 @@ public class RED_PGP_main extends LinearOpMode {
                 camera_on = false;
                 telemetry.clear();
                 telemetry.addData("Camera:", "Off");
-//                telemetry.update();
+                telemetry.update();
             }
 
 
@@ -336,7 +344,6 @@ public class RED_PGP_main extends LinearOpMode {
             //intake position
             if(gamepad1.dpad_left){
                 sensing = false;
-                //MAYBE CHANGE AKS!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 onetwothreeShoot = true;
                 spindex.setPosition(0);
             }
@@ -390,7 +397,6 @@ public class RED_PGP_main extends LinearOpMode {
             if(launchDistanceChange && llResult != null && llResult.isValid()){
                 distance = getDistanceFromTags(llResult.getTa());
 
-//CHAGNGEN -20 DISTANCE AFTER CLAIBRATION-------------------------------------------------------------------------
                 if(secondThird <= 1){
                     launchPower = (0.0025 * (distance)) + voltChange;
                 } else if (secondThird == 2) {
@@ -399,8 +405,6 @@ public class RED_PGP_main extends LinearOpMode {
                     launchPower = (0.0025 * distance) + voltChange + 0.15;
                 }
 
-                telemetry.addData("Launch Power: ", launchPower);
-                telemetry.update();
                 launcher.setPower(launchPower);
             } else if(launchDistanceChange){
                 launcher.setPower((0.0025 * 175) + voltChange);
@@ -418,9 +422,6 @@ public class RED_PGP_main extends LinearOpMode {
             }
 
             if(gamepad2.b && !start){
-//                telemetry.addData("Launch Power: ", launchPower);
-//                telemetry.update();
-
                 if(!restart) {
                     spinToLaunch = false;
                     stopLaunchSequence = false;

@@ -880,23 +880,18 @@ public class TESTING_limelightAuto extends LinearOpMode {
 
     public double voltSpeed(VoltageSensor controlHubVoltageSensor){
         double voltage = controlHubVoltageSensor.getVoltage();
+        double power;
 
-        if(voltage >= 13.5){
-            return 0;
-        }else if(voltage >= 13.1){
-            return 0.05;
-        } else if (voltage >= 12.6){
-            return 0.1;
-        } else if (voltage >= 12.1){
-            return 0.125;
-        } else if (voltage >= 11.6){
-            return 0.15;
-        } else if (voltage >= 11.1){
-            return 0.175;
-        } else if (voltage >= 10.6){
-            return 0.2;
+        if(voltage >= 12.6){
+            power = ((-0.0585 * voltage) + 0.844191);
         } else {
-            return 0.05;
+            power = ((-0.0600978 * voltage) + 0.844191);
+        }
+
+        if(power < 0){
+            return 0;
+        } else {
+            return power;
         }
     }
 }
