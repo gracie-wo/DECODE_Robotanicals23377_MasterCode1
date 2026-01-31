@@ -13,6 +13,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.acmerobotics.dashboard.config.Config;
 
 
+@Disabled
 @Config
 public class PIDTuning extends LinearOpMode{
     DcMotorEx flywheel;

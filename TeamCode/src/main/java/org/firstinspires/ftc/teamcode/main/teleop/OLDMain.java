@@ -24,7 +24,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
 @Disabled
 @TeleOp(name = "Main", group = "Main")
-public class Main extends LinearOpMode {
+public class OLDMain extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 

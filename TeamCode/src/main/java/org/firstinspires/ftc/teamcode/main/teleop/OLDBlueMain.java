@@ -27,7 +27,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
 @Disabled
 @TeleOp(name = "Blue Main", group = "Main")
-public class BlueMain extends LinearOpMode {
+public class OLDBlueMain extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         NormalizedColorSensor sensor = hardwareMap.get(NormalizedColorSensor.class, "colorSensor");
