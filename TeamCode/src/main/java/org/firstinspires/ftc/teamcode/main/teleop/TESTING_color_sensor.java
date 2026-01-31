@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.OpticalDistanceSensor;
 
 import org.firstinspires.ftc.robotcore.external.JavaUtil;
 
+@Disabled
 @TeleOp(name = "color sensor", group = "testing")
 public class TESTING_color_sensor extends LinearOpMode {
     @Override

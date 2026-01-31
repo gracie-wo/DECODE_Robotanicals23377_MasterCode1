@@ -22,7 +22,7 @@ import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.GoBildaPinpointDriver;
 
-@TeleOp(name = "Red GPP", group = "Main")
+@TeleOp(name = "Red GPP", group = "Red Main")
 public class RED_GPP_main extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
@@ -103,7 +103,7 @@ public class RED_GPP_main extends LinearOpMode {
         int current_state = 0;
         int wait_time = 0;
         boolean end_state = false;
-        double spinTime = 0.6;
+        double spinTime = 0.4;
         boolean start = false;
         boolean restart = false;
         boolean onlyKicker= false;
@@ -390,15 +390,15 @@ public class RED_GPP_main extends LinearOpMode {
                 launcher.setPower(0);
             }
 
-            if(launchDistanceChange && llResult != null && llResult.isValid()){
+            if(camera_on && launchDistanceChange && llResult != null && llResult.isValid()){
                 distance = getDistanceFromTags(llResult.getTa());
 
                 if(secondThird <= 1){
-                    launchPower = (0.0025 * (distance)) + voltChange;
+                    launchPower = (0.0024 * (distance)) + voltChange;
                 } else if (secondThird == 2) {
-                    launchPower = (0.0025 * distance) + voltChange + 0.2;
+                    launchPower = (0.0024 * distance) + voltChange + 0.18;
                 } else {
-                    launchPower = (0.0025 * distance) + voltChange + 0.15;
+                    launchPower = (0.0024 * distance) + voltChange + 0.13;
                 }
 
                 launcher.setPower(launchPower);
@@ -426,7 +426,7 @@ public class RED_GPP_main extends LinearOpMode {
                     current_state = 0;
                     wait_time = 0;
                     end_state = false;
-                    spinTime = 0.6;
+                    spinTime = 0.4;
                     start = true;
                     secondThird = 0;
 
@@ -517,7 +517,7 @@ public class RED_GPP_main extends LinearOpMode {
                     spindex.setPosition(0);
                 } else if(twothreeoneShoot){
                     spindex.setPosition(0);
-                    spinTime = 0.8;
+                    spinTime = 0.6;
                 }
 
                 secondThird++;
@@ -532,7 +532,7 @@ public class RED_GPP_main extends LinearOpMode {
                 rotate_state = 1;
                 wait_time = 0;
                 timer.reset();
-                spinTime = 0.6;
+                spinTime = 0.4;
             }
 
         }
@@ -551,7 +551,7 @@ public class RED_GPP_main extends LinearOpMode {
         double voltage = controlHubVoltageSensor.getVoltage();
         double power;
 
-        if(voltage >= 12.6){
+        if(voltage >= 12.6 && voltage <= 13){
             power = ((-0.0585 * voltage) + 0.844191);
         } else {
             power = ((-0.0600978 * voltage) + 0.844191);

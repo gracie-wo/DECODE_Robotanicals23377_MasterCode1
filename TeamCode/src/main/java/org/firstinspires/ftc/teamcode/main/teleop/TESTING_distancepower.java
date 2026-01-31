@@ -15,6 +15,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
+@Disabled
 @TeleOp(name = "LimeLight distsance", group = "Tele Op")
 public class TESTING_distancepower extends LinearOpMode {
     @Override
@@ -103,6 +104,7 @@ public class TESTING_distancepower extends LinearOpMode {
 
                 launcher.setPower(0);
             }
+
 
             if(gamepad1.dpad_left){
                 launcher.setPower(0.5);

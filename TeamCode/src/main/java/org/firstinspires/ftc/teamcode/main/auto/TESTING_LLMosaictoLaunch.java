@@ -16,6 +16,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -31,6 +32,7 @@ import org.firstinspires.ftc.teamcode.MecanumDrive;
 
 import java.util.List;
 
+@Disabled
 //blue april tag
 @Config
 @Autonomous(name = "TESTING_LLMosaic to Launch", group = "testing")
@@ -57,11 +59,11 @@ public class TESTING_LLMosaictoLaunch extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet){
                 int n = 0;
-                while(n <= 10) {
+                while(n <= 2) {
                     llResult = limelight.getLatestResult();
+                    limelight.pipelineSwitch(0);
 
                     int tagId = 21;
-
                     if (llResult != null && llResult.isValid()) {
                         Pose3D botPose = llResult.getBotpose_MT2();
                         telemetry.addData("Distance", getDistanceFromTags(llResult.getTa()));
@@ -678,24 +680,24 @@ public class TESTING_LLMosaictoLaunch extends LinearOpMode {
         // ------------------------- RUN AUTO -------------------------
         Actions.runBlocking(
                 new SequentialAction(
-                        limelight.mosaicDetect(),
-                        new SleepAction(3),
+                        limelight.mosaicDetect()
+//                        new SleepAction(0.5)
 
-                        //USE MORE PARALLEL ACTIONS BRO
-                        //can parallel action rotator spinning and spindex spinning
-                        spindex.startSpindexLaunchOne(),
-                        new SleepAction(0.8),
-                        //prob don't need this if you just time how long it takes for rotator to spin to yknow
-                        //but 0.8 = how much time to spin one full circle = worst time complexity
-
-
-                        spindex.startSpindexLaunchTwo(),
-                        new SleepAction(0.6),
-                        //0.6 = how much time wait for spindex to spin to next location (second time)
-
-                        spindex.startSpindexLaunchThree(),
-                        new SleepAction(0.8)
-                        //0.8 = how much time wait for spindex to spin to next location for THIRD time
+//                        //USE MORE PARALLEL ACTIONS BRO
+//                        //can parallel action rotator spinning and spindex spinning
+//                        spindex.startSpindexLaunchOne(),
+//                        new SleepAction(0.8)
+//                        //prob don't need this if you just time how long it takes for rotator to spin to yknow
+//                        //but 0.8 = how much time to spin one full circle = worst time complexity
+//
+//
+//                        spindex.startSpindexLaunchTwo(),
+//                        new SleepAction(0.6),
+//                        //0.6 = how much time wait for spindex to spin to next location (second time)
+//
+//                        spindex.startSpindexLaunchThree(),
+//                        new SleepAction(0.8)
+//                        //0.8 = how much time wait for spindex to spin to next location for THIRD time
                 )
         );
 

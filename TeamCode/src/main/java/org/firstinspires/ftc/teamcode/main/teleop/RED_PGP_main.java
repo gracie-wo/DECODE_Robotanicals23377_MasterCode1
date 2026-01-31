@@ -22,7 +22,7 @@ import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.GoBildaPinpointDriver;
 
-@TeleOp(name = "Red PGP", group = "Main")
+@TeleOp(name = "Red PGP", group = "Red Main")
 public class RED_PGP_main extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
@@ -394,20 +394,20 @@ public class RED_PGP_main extends LinearOpMode {
                 launcher.setPower(0);
             }
 
-            if(launchDistanceChange && llResult != null && llResult.isValid()){
+            if(camera_on && launchDistanceChange && llResult != null && llResult.isValid()){
                 distance = getDistanceFromTags(llResult.getTa());
 
                 if(secondThird <= 1){
-                    launchPower = (0.0025 * (distance)) + voltChange;
+                    launchPower = (0.0024 * (distance)) + voltChange;
                 } else if (secondThird == 2) {
-                    launchPower = (0.0025 * distance) + voltChange + 0.2;
+                    launchPower = (0.0024 * distance) + voltChange + 0.18;
                 } else {
-                    launchPower = (0.0025 * distance) + voltChange + 0.15;
+                    launchPower = (0.0024 * distance) + voltChange + 0.13;
                 }
 
                 launcher.setPower(launchPower);
             } else if(launchDistanceChange){
-                launcher.setPower((0.0025 * 175) + voltChange);
+                launcher.setPower((0.0025 * 120) + voltChange);
             }
 
             //stop auto launch sequence
@@ -554,13 +554,13 @@ public class RED_PGP_main extends LinearOpMode {
         double voltage = controlHubVoltageSensor.getVoltage();
         double power;
 
-        if(voltage >= 12.6){
+        if(voltage >= 12.6 && voltage <= 13){
             power = ((-0.0585 * voltage) + 0.844191);
         } else {
             power = ((-0.0600978 * voltage) + 0.844191);
         }
 
-        //-0.0432592x+0.635392 combo for both
+//        power = (-0.0432592 * voltage) + 0.635392;
         //connects 12.4 and 13.7
         //might need to change to connect 12.4 and 13.4 or smth like that
 

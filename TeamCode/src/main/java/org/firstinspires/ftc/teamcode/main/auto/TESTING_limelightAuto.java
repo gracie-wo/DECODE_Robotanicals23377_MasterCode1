@@ -59,6 +59,7 @@ public class TESTING_limelightAuto extends LinearOpMode {
                 int n = 0;
                 while(n <= 10) {
                     llResult = limelight.getLatestResult();
+                    limelight.pipelineSwitch(0);
 
                     int tagId = 21;
 
@@ -104,7 +105,7 @@ public class TESTING_limelightAuto extends LinearOpMode {
             return new MoasicDetect();
         }
 
-        public class SwitchPipeline implements Action{
+        public class SwitchPipeline2 implements Action{
             @Override
             public boolean run(@NonNull TelemetryPacket packet){
                 limelight.pipelineSwitch(2);
@@ -113,8 +114,21 @@ public class TESTING_limelightAuto extends LinearOpMode {
             }
         }
 
-        public Action switchPipeline(){
-            return new SwitchPipeline();
+        public Action switchPipeline2(){
+            return new SwitchPipeline2();
+        }
+
+        public class SwitchPipeline0 implements Action{
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet){
+                limelight.pipelineSwitch(0);
+
+                return false;
+            }
+        }
+
+        public Action switchPipeline0(){
+            return new SwitchPipeline0();
         }
      }
 
@@ -213,9 +227,9 @@ public class TESTING_limelightAuto extends LinearOpMode {
 //
                 if(llResult != null && llResult.isValid()){
                     double distance = getDistanceFromTags(llResult.getTa());
-                    launchPower = (0.0025 * (distance)) + voltChange + 0.2;
+                    launchPower = (0.0025 * (distance)) + voltChange + 0.18;
                 } else {
-                    launchPower = (0.0025 * 185) + voltChange + 0.2;
+                    launchPower = (0.0025 * 185) + voltChange + 0.18;
                 }
                 //185
                 launcher.setPower(launchPower);
@@ -235,9 +249,9 @@ public class TESTING_limelightAuto extends LinearOpMode {
 //
                 if(llResult != null && llResult.isValid()){
                     double distance = getDistanceFromTags(llResult.getTa());
-                    launchPower = (0.0025 * (distance)) + voltChange + 0.15;
+                    launchPower = (0.0025 * (distance)) + voltChange + 0.13;
                 } else {
-                    launchPower = (0.0025 * 185) + voltChange + 0.15;
+                    launchPower = (0.0025 * 185) + voltChange + 0.13;
                 }
                 //185
                 launcher.setPower(launchPower);
@@ -265,7 +279,7 @@ public class TESTING_limelightAuto extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 //VALUE OF 185 MAY NEED TO BE ADJUSTED
-                launcher.setPower((0.0025 * 185) + voltChange);
+                launcher.setPower((0.0025 * 140) + voltChange);
                 return false;
             }
         }
@@ -291,6 +305,8 @@ public class TESTING_limelightAuto extends LinearOpMode {
         public class SpindexIntakeOne implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet){
+                telemetry.addData("Line num", linePickUp);
+                telemetry.update();
                 if(linePickUp == 1){
                     if(pattern.equals("GPP")){
                         spindex.setPosition(0.1);
@@ -390,29 +406,26 @@ public class TESTING_limelightAuto extends LinearOpMode {
                 if(linePickUp == 1){
                     if(pattern.equals("GPP")){
                         spindex.setPosition(1);
-                        return false;
                     } else if(pattern.equals("PGP")){
                         spindex.setPosition(0.1);
-                        return false;
                     } else if(pattern.equals("PPG")){
                         spindex.setPosition(0.56);
-                        return false;
                     }
 
                     linePickUp = 2;
+                    return false;
+
                 } else if(linePickUp == 2){
                     if(pattern.equals("GPP")){
                         spindex.setPosition(0.1);
-                        return false;
                     } else if(pattern.equals("PGP")){
                         spindex.setPosition(1);
-                        return false;
                     } else if(pattern.equals("PPG")){
                         spindex.setPosition(1);
-                        return false;
                     }
 
                     linePickUp = 3;
+                    return false;
                 } else if(linePickUp == 3){
                     if(pattern.equals("GPP")){
                         spindex.setPosition(0.1);
@@ -706,23 +719,49 @@ public class TESTING_limelightAuto extends LinearOpMode {
         Spindex spindex = new Spindex(hardwareMap);
         Rotator rotator = new Rotator(hardwareMap);
 
-        TrajectoryActionBuilder one = drive.actionBuilder(initialPose)
-                .strafeToConstantHeading (new Vector2d(4, 0));
+
+        TrajectoryActionBuilder launch1 = drive.actionBuilder(initialPose)
+                .strafeToLinearHeading (new Vector2d(-28, 38), Math.toRadians(-25));
+
+        TrajectoryActionBuilder one = launch1.fresh()
+                .strafeToLinearHeading (new Vector2d(-37, 19), Math.toRadians(-90));
         TrajectoryActionBuilder two = one.fresh()
-                .strafeToConstantHeading (new Vector2d(8, 0));
+                .strafeToConstantHeading (new Vector2d(-35, 15));
         TrajectoryActionBuilder three = two.fresh()
-                .strafeToConstantHeading (new Vector2d(12, 0));
+                .strafeToConstantHeading (new Vector2d(-33, 11));
+
+        TrajectoryActionBuilder launch2 = three.fresh()
+                .strafeToLinearHeading (new Vector2d(-28, 38), Math.toRadians(-55));
+
+        TrajectoryActionBuilder one2 = launch2.fresh()
+                .strafeToLinearHeading (new Vector2d(-59, 25), Math.toRadians(-90))
+                .strafeToLinearHeading (new Vector2d(-59, 21), Math.toRadians(-90));
+        TrajectoryActionBuilder two2 = one2.fresh()
+                .strafeToConstantHeading (new Vector2d(-57, 17));
+        TrajectoryActionBuilder three2 = two2.fresh()
+                .strafeToConstantHeading (new Vector2d(-55, 10));
+
+        TrajectoryActionBuilder launch3 = three2.fresh()
+                .strafeToLinearHeading (new Vector2d(-28, 38), Math.toRadians(-55));
+
 
         Action oneA = one.build();
         Action twoA = two.build();
         Action threeA = three.build();
 
-
-
-        TrajectoryActionBuilder launch1 = drive.actionBuilder(initialPose)
-                .strafeToLinearHeading (new Vector2d(-28, -42), Math.toRadians(-55));
-
         Action launch1A = launch1.build();
+        Action launch2A = launch2.build();
+        Action launch3A = launch3.build();
+
+        Action one2A = one2.build();
+        Action two2A = two2.build();
+        Action three2A = three2.build();
+
+        Actions.runBlocking(limelight.switchPipeline0());
+        Actions.runBlocking(kickerRotate.kickerRotateDownInit());
+        Actions.runBlocking(rotator.rotateLaunch());
+
+
 
         waitForStart();
         if (isStopRequested()) return;
@@ -731,139 +770,213 @@ public class TESTING_limelightAuto extends LinearOpMode {
         // ------------------------- RUN AUTO -------------------------
         Actions.runBlocking(
                 new SequentialAction(
-                        launch1A,
-                        //launcher.launchOnStart
-                        //allow launcher time to warm up
-                        rotator.rotateMosaic(),
-                        new SleepAction(2),
-                        //decrease this time, i don't think it takes 2 seconds to rotate
-                        limelight.mosaicDetect(),
-                        new SleepAction(0.1),
-                        //legit takes no time to detect pretty sure
-
-                        //use parallel actions like this to cut down on time
                         new ParallelAction(
-                            limelight.switchPipeline(),
-                            spindex.startSpindexLaunchOne(),
-                            rotator.rotateLaunch(),
-                            new SleepAction(2)
-                            //bro i think you can decrease this time, no way it takes 2 seocnds to rotate
-                            //rn we need to decrease time as much as possible to allow for 3 launches
-                            //try new SleepAction(0.6)
-                            //the timing here should be 0.6 < x < 1, x = time in sleep action
+                                launch1A,
+                                launcher.launchOnStart(),
+                                rotator.rotateMosaic()
                         ),
 
-                        //for first launch the spindex method is called spindex.startSpindexLaunch____
-                        //for ALL launches after the first launch the method is just called spindex.spindexLaunch___ (1, 2, 3)
-                        //the code is in the file, TESTING_LLMosaictoLaunch for FIRST launching spindex
-                        //it works btw i tested it
+                        limelight.mosaicDetect(),
 
-                        //launch speeds are different for each ball to launch
-                        //first one is reg distance + volt
-                        //second is distance + volt + 0.2
-                        //third is distance + volt + 0.15
+                        new ParallelAction(
+                            limelight.switchPipeline2(),
+                            spindex.startSpindexLaunchOne(),
+                            rotator.rotateLaunch(),
+                            new SleepAction(0.6)
+                        ),
 
-                        //ex code frame
-                        //new Parallel Action(
-                        //      launcher.launchOnOne,
-                        //      new Sequencial action(spindex and kicker stuff)
-                        //      refer to teleop for spindex times for sleep action
-                        //      pretty sure its 0.6 cause we always launch 1,2,3 in auto EXCEPT FOR FIRST TIME
-                        // )
-                        //
-                        //new Parallel Action(
-                        //      launcher.launchOnTwo,
-                        //      new sequeedntial action(spindex and kicker stuff)
-                        // )
-                        //
-                        //new Prallel action(
-                        //      launcher.launchOnThree,
-                        //      new sequenatila action(spindex and kicker stuff)
-                        // )
+                        new ParallelAction(
+                                launcher.launchOnOne(),
+                                new SequentialAction(
+                                        kickerRotate.kickerRotateUp(),
+                                        new SleepAction(0.5),
+                                        kickerRotate.kickerRotateDown(),
+                                        new SleepAction(0.3)
+                                )
+                        ),
 
-                        rotator.rotateLaunch(),
-                        new SleepAction(2),
-                        kickerRotate.kickerRotateUp(),
-                        new SleepAction(0.5),
-                        //sleep action is 0.6 for spinning for LAUNCHING ONLY btw
-                        //sleep action for spinning spindex for intake is 0.5 and/or 0.7
-                        //for spindex spinning for intake do 0.7 after 2nd and 3rd cause worst case scenrio
-                        kickerRotate.kickerRotateDown(),
-                        new SleepAction(0.3),
-                        spindex.startSpindexLaunchTwo(),
-                        new SleepAction(0.6),
-                        kickerRotate.kickerRotateUp(),
-                        new SleepAction(0.5),
-                        kickerRotate.kickerRotateDown(),
-                        new SleepAction(0.3),
-                        spindex.startSpindexLaunchThree(),
-                        new SleepAction(0.6),
-                        kickerRotate.kickerRotateUp(),
-                        new SleepAction(0.5),
-                        //im pretty sure i fixed the timings for sleep action but just test
-                        //if it doesn't work then change, if it does work then pls dont change
+                        new ParallelAction(
+                                launcher.launchOnTwo(),
+                                spindex.startSpindexLaunchTwo(),
+                                new SleepAction(0.4)
 
+                        ),
+
+                        new ParallelAction(
+                                launcher.launchOnTwo(),
+                                new SequentialAction(
+                                        kickerRotate.kickerRotateUp(),
+                                        new SleepAction(0.5),
+                                        kickerRotate.kickerRotateDown(),
+                                        new SleepAction(0.3)
+                                )
+                        ),
+
+                        new ParallelAction(
+                                launcher.launchOnThree(),
+                                spindex.startSpindexLaunchThree(),
+                                new SleepAction(0.6)
+                        ),
+
+                        new ParallelAction(
+                                launcher.launchOnThree(),
+                                new SequentialAction(
+                                        kickerRotate.kickerRotateUp(),
+                                        new SleepAction(0.5),
+                                        kickerRotate.kickerRotateDown(),
+                                        new SleepAction(0.3)
+                                )
+                        ),
 
                         //go to intake 1
                         new ParallelAction(
                                 intake.intakeOn(),
                                 new SequentialAction(
-                                        oneA,
-                                        spindex.spindexIntakeTwo(),
+                                        new ParallelAction(
+                                                oneA,
+                                                spindex.spindexIntakeOne()
+                                        ),
                                         new SleepAction(0.4),
-                                        //may have to adjust sleep action value
-                                        twoA,
-                                        spindex.spindexIntakeThree(),
+                                        new ParallelAction(
+                                                twoA,
+                                                spindex.spindexIntakeTwo()
+                                        ),
+                                        new SleepAction(0.6),
+                                        new ParallelAction(
+                                                threeA,
+                                                spindex.spindexIntakeThree()
+                                        )
+                                )
+                        ),
+
+                        new ParallelAction(
+                                new SequentialAction(
+                                        //may cause  error
+                                        new SleepAction(0.4),
+                                        spindex.spindexLaunchOne()
+                                ),
+                                rotator.rotateLaunch(),
+                                launch2A
+                        ),
+
+                        new ParallelAction(
+                                intake.intakeOff(),
+                                launcher.launchOnOne(),
+                                new SequentialAction(
+                                        kickerRotate.kickerRotateUp(),
                                         new SleepAction(0.5),
-                                        //may have to adjust sleep action value
-                                        threeA
+                                        kickerRotate.kickerRotateDown(),
+                                        new SleepAction(0.3)
+                                )
+                        ),
+
+                        new ParallelAction(
+                                launcher.launchOnTwo(),
+                                spindex.spindexLaunchTwo(),
+                                new SleepAction(0.4)
+                        ),
+
+                        new ParallelAction(
+                                launcher.launchOnTwo(),
+                                new SequentialAction(
+                                        kickerRotate.kickerRotateUp(),
+                                        new SleepAction(0.5),
+                                        kickerRotate.kickerRotateDown(),
+                                        new SleepAction(0.3)
+                                )
+                        ),
+
+                        new ParallelAction(
+                                launcher.launchOnThree(),
+                                spindex.spindexLaunchThree(),
+                                new SleepAction(0.4)
+                        ),
+
+                        new ParallelAction(
+                                launcher.launchOnThree(),
+                                new SequentialAction(
+                                        kickerRotate.kickerRotateUp(),
+                                        new SleepAction(0.5),
+                                        kickerRotate.kickerRotateDown(),
+                                        new SleepAction(0.3)
+                                )
+                        ),
+
+                        new ParallelAction(
+                                intake.intakeOn(),
+                                new SequentialAction(
+                                        new ParallelAction(
+                                                one2A,
+                                                spindex.spindexIntakeOne()
+                                        ),
+                                        new SleepAction(0.4),
+                                        new ParallelAction(
+                                                two2A,
+                                                spindex.spindexIntakeTwo()
+                                        ),
+                                        new SleepAction(0.4),
+                                        new ParallelAction(
+                                                three2A,
+                                                spindex.spindexIntakeThree()
+                                        )
+                                )
+                        ),
+
+
+                        new ParallelAction(
+                                new SequentialAction(
+                                        //may cause  error
+                                        new SleepAction(0.4),
+                                        spindex.spindexLaunchOne()
+                                ),
+                                rotator.rotateLaunch(),
+                                launch3A
+                        ),
+
+                        new ParallelAction(
+                                intake.intakeOff(),
+                                launcher.launchOnOne(),
+                                new SequentialAction(
+                                        kickerRotate.kickerRotateUp(),
+                                        new SleepAction(0.5),
+                                        kickerRotate.kickerRotateDown(),
+                                        new SleepAction(0.3)
+                                )
+                        ),
+
+                        new ParallelAction(
+                                launcher.launchOnTwo(),
+                                spindex.spindexLaunchTwo(),
+                                new SleepAction(0.4)
+                        ),
+
+                        new ParallelAction(
+                                launcher.launchOnTwo(),
+                                new SequentialAction(
+                                        kickerRotate.kickerRotateUp(),
+                                        new SleepAction(0.5),
+                                        kickerRotate.kickerRotateDown(),
+                                        new SleepAction(0.3)
+                                )
+                        ),
+
+                        new ParallelAction(
+                                launcher.launchOnThree(),
+                                spindex.spindexLaunchThree(),
+                                new SleepAction(0.4)
+                        ),
+
+                        new ParallelAction(
+                                launcher.launchOnThree(),
+                                new SequentialAction(
+                                        kickerRotate.kickerRotateUp(),
+                                        new SleepAction(0.5),
+                                        kickerRotate.kickerRotateDown(),
+                                        new SleepAction(0.3)
                                 )
                         )
-                        //go to launch line & launch
-                        // go to intake 2 line and intake
-                        // go to launch line and launch
 
 
-
-//                        new SleepAction(5)
-
-//                        new ParallelAction(
-//                                kickerCont.kickerContOn(),
-//                                launcher.launchOn(),
-//                                new SequentialAction(
-//                                    new ParallelAction(
-//                                        launch1A,
-//                                        rotator.rotateMosaic(),
-//                                        limelight.mosaicDetect()
-//                                    ),
-//                                    spindex.startSpindexLaunchOne(),
-//                                    rotator.rotateLaunch(),
-//                                    new SleepAction(0.6),
-//                                    //launch w/spindex
-//                                    kickerRotate.kickerRotateUp(),
-//                                    new SleepAction(0.5),
-//                                    kickerRotate.kickerRotateDown(),
-//                                    new SleepAction(0.3),
-//                                    spindex.startSpindexLaunchTwo(),
-//                                    new SleepAction(0.6),
-//                                    kickerRotate.kickerRotateUp(),
-//                                    new SleepAction(0.5),
-//                                    kickerRotate.kickerRotateDown(),
-//                                    new SleepAction(0.3),
-//                                    spindex.startSpindexLaunchThree(),
-//                                    new SleepAction(0.6),
-//                                    kickerRotate.kickerRotateUp(),
-//                                    new SleepAction(0.5),
-//                                    kickerRotate.kickerRotateDown()
-//                                )
-//                        ),
-//
-//                        new ParallelAction(
-//                                launcher.launchOff(),
-//                                kickerCont.kickerContOff()
-//                        )
-//
-                //)
                 )
         );
 
@@ -882,7 +995,7 @@ public class TESTING_limelightAuto extends LinearOpMode {
         double voltage = controlHubVoltageSensor.getVoltage();
         double power;
 
-        if(voltage >= 12.6){
+        if(voltage >= 12.6 && voltage <= 13){
             power = ((-0.0585 * voltage) + 0.844191);
         } else {
             power = ((-0.0600978 * voltage) + 0.844191);
