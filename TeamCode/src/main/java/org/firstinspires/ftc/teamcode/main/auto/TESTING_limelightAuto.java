@@ -195,21 +195,21 @@ public class TESTING_limelightAuto extends LinearOpMode {
             controlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
             voltChange = voltSpeed(controlHubVoltageSensor);
 
-            launchPower = (0.0025 * 175) + voltChange;
+            launchPower = (0.0024 * 140) + voltChange;
         }
 
         public class LaunchOnOne implements Action{
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                llResult = limelight.getLatestResult();
+//                llResult = limelight.getLatestResult();
                 voltChange = voltSpeed(controlHubVoltageSensor);
 //
-                if(llResult != null && llResult.isValid()){
-                    double distance = getDistanceFromTags(llResult.getTa());
-                    launchPower = (0.0025 * (distance)) + voltChange;
-                } else {
-                    launchPower = (0.0025 * 185) + voltChange;
-                }
+//                if(llResult != null && llResult.isValid()){
+//                    double distance = getDistanceFromTags(llResult.getTa());
+//                    launchPower = (0.0025 * (distance)) + voltChange;
+//                } else {
+                launchPower = (0.0024 * 140) + voltChange;
+//                }
                 //185
                 launcher.setPower(launchPower);
                 return false;
@@ -223,14 +223,16 @@ public class TESTING_limelightAuto extends LinearOpMode {
         public class LaunchOnTwo implements Action{
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                llResult = limelight.getLatestResult();
-//
-                if(llResult != null && llResult.isValid()){
-                    double distance = getDistanceFromTags(llResult.getTa());
-                    launchPower = (0.0025 * (distance)) + voltChange + 0.18;
-                } else {
-                    launchPower = (0.0025 * 185) + voltChange + 0.18;
-                }
+//                llResult = limelight.getLatestResult();
+
+                voltChange = voltSpeed(controlHubVoltageSensor);
+////
+//                if(llResult != null && llResult.isValid()){
+//                    double distance = getDistanceFromTags(llResult.getTa());
+//                    launchPower = (0.0025 * (distance)) + voltChange + 0.18;
+//                } else {
+                launchPower = (0.0024 * 140) + voltChange + 0.18;
+//                }
                 //185
                 launcher.setPower(launchPower);
                 return false;
@@ -244,15 +246,15 @@ public class TESTING_limelightAuto extends LinearOpMode {
         public class LaunchOnThree implements Action{
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-                llResult = limelight.getLatestResult();
+//                llResult = limelight.getLatestResult();
                 voltChange = voltSpeed(controlHubVoltageSensor);
 //
-                if(llResult != null && llResult.isValid()){
-                    double distance = getDistanceFromTags(llResult.getTa());
-                    launchPower = (0.0025 * (distance)) + voltChange + 0.13;
-                } else {
-                    launchPower = (0.0025 * 185) + voltChange + 0.13;
-                }
+//                if(llResult != null && llResult.isValid()){
+//                    double distance = getDistanceFromTags(llResult.getTa());
+//                    launchPower = (0.0025 * (distance)) + voltChange + 0.13;
+//                } else {
+                launchPower = (0.0024 * 140) + voltChange + 0.13;
+//                }
                 //185
                 launcher.setPower(launchPower);
                 return false;
@@ -279,7 +281,7 @@ public class TESTING_limelightAuto extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 //VALUE OF 185 MAY NEED TO BE ADJUSTED
-                launcher.setPower((0.0025 * 140) + voltChange);
+                launcher.setPower((0.0024 * 140) + voltChange);
                 return false;
             }
         }
@@ -609,6 +611,18 @@ public class TESTING_limelightAuto extends LinearOpMode {
             return new RotateLaunch();
         }
 
+        public class RotateLaunchStart implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet){
+                rotator.setPosition(0.8);
+                return false;
+            }
+        }
+
+        public Action rotateLaunchStart(){
+            return new RotateLaunchStart();
+        }
+
         public class RotateMosaic implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet){
@@ -724,6 +738,7 @@ public class TESTING_limelightAuto extends LinearOpMode {
                 .strafeToLinearHeading (new Vector2d(-28, 38), Math.toRadians(-25));
 
         TrajectoryActionBuilder one = launch1.fresh()
+                .strafeToLinearHeading (new Vector2d(-37, 26), Math.toRadians(-90))
                 .strafeToLinearHeading (new Vector2d(-37, 19), Math.toRadians(-90));
         TrajectoryActionBuilder two = one.fresh()
                 .strafeToConstantHeading (new Vector2d(-35, 15));
@@ -734,7 +749,7 @@ public class TESTING_limelightAuto extends LinearOpMode {
                 .strafeToLinearHeading (new Vector2d(-28, 38), Math.toRadians(-55));
 
         TrajectoryActionBuilder one2 = launch2.fresh()
-                .strafeToLinearHeading (new Vector2d(-59, 25), Math.toRadians(-90))
+                .strafeToLinearHeading (new Vector2d(-59, 28), Math.toRadians(-90))
                 .strafeToLinearHeading (new Vector2d(-59, 21), Math.toRadians(-90));
         TrajectoryActionBuilder two2 = one2.fresh()
                 .strafeToConstantHeading (new Vector2d(-57, 17));
@@ -771,19 +786,23 @@ public class TESTING_limelightAuto extends LinearOpMode {
         Actions.runBlocking(
                 new SequentialAction(
                         new ParallelAction(
-                                launch1A,
                                 launcher.launchOnStart(),
-                                rotator.rotateMosaic()
+                                new ParallelAction(
+                                        launch1A,
+                                        rotator.rotateMosaic()
+                                ),
+
+                                limelight.mosaicDetect(),
+
+                                new ParallelAction(
+                                        limelight.switchPipeline2(),
+                                        spindex.startSpindexLaunchOne(),
+                                        rotator.rotateLaunchStart(),
+                                        kickerCont.kickerContOn(),
+                                        new SleepAction(0.6)
+                                )
                         ),
 
-                        limelight.mosaicDetect(),
-
-                        new ParallelAction(
-                            limelight.switchPipeline2(),
-                            spindex.startSpindexLaunchOne(),
-                            rotator.rotateLaunch(),
-                            new SleepAction(0.6)
-                        ),
 
                         new ParallelAction(
                                 launcher.launchOnOne(),
@@ -830,6 +849,8 @@ public class TESTING_limelightAuto extends LinearOpMode {
 
                         //go to intake 1
                         new ParallelAction(
+                                launcher.launchOff(),
+                                kickerCont.kickerContOff(),
                                 intake.intakeOn(),
                                 new SequentialAction(
                                         new ParallelAction(
@@ -850,12 +871,14 @@ public class TESTING_limelightAuto extends LinearOpMode {
                         ),
 
                         new ParallelAction(
+                                launcher.launchOnOne(),
                                 new SequentialAction(
                                         //may cause  error
                                         new SleepAction(0.4),
                                         spindex.spindexLaunchOne()
                                 ),
                                 rotator.rotateLaunch(),
+                                kickerCont.kickerContOn(),
                                 launch2A
                         ),
 
@@ -903,6 +926,8 @@ public class TESTING_limelightAuto extends LinearOpMode {
                         ),
 
                         new ParallelAction(
+                                launcher.launchOff(),
+                                kickerCont.kickerContOff(),
                                 intake.intakeOn(),
                                 new SequentialAction(
                                         new ParallelAction(
@@ -929,7 +954,9 @@ public class TESTING_limelightAuto extends LinearOpMode {
                                         new SleepAction(0.4),
                                         spindex.spindexLaunchOne()
                                 ),
+                                kickerCont.kickerContOn(),
                                 rotator.rotateLaunch(),
+                                launcher.launchOnOne(),
                                 launch3A
                         ),
 
