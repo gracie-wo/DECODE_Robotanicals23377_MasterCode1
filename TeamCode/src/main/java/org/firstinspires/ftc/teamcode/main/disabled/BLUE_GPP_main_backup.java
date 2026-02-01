@@ -1,8 +1,9 @@
-package org.firstinspires.ftc.teamcode.main.teleop;
+package org.firstinspires.ftc.teamcode.main.disabled;
 
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -22,33 +23,9 @@ import org.firstinspires.ftc.robotcore.external.JavaUtil;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.GoBildaPinpointDriver;
 
-@TeleOp(name = "Red PGP", group = "Red Main")
-public class RED_PGP_main extends LinearOpMode {
-    final double kP = 12;
-    //ability to change intertia (change direction
-    final double kI = 0.0;
-    //jerk lmao
-    final double kD = 0.01;
-    //idek
-    final double kF = 1;
-    private final ElapsedTime timer = new ElapsedTime();
-    private double lastError = 0;
-    private double integralSum = 0;
-    public class SimplePIDController {
-        public double update(double reference, double state) {
-            double error = reference - state;
-            integralSum += error * timer.seconds(); // Integrate error over time
-            double derivative = (error - lastError) / timer.seconds(); // Calculate derivative of error
-            lastError = error;
-            timer.reset(); // Reset the timer for the next loop iteration
-
-            // Calculate output power using PIDF formula
-            double output = (error * kP) + (derivative * kD) + (integralSum * kI) + (reference * kF);
-            return output;
-        }
-    }
-
-
+@TeleOp(name = "Blue GPP", group = "Blue Main")
+@Disabled
+public class BLUE_GPP_main_backup extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         IMU imu = hardwareMap.get(IMU.class, "imu");
@@ -60,7 +37,7 @@ public class RED_PGP_main extends LinearOpMode {
         imu.initialize(parameters);
 
         Limelight3A limelight = hardwareMap.get(Limelight3A.class, "limelight");
-        limelight.pipelineSwitch(2);
+        limelight.pipelineSwitch(1);
         LLResult llResult = limelight.getLatestResult();
         limelight.start();
 
@@ -81,43 +58,41 @@ public class RED_PGP_main extends LinearOpMode {
         double hue = 0.0;
         String color_detected = "None";
 
-
         Servo kicker_rotate = hardwareMap.get(Servo.class, "kicker1");
         CRServo kicker_continuous = hardwareMap.get(CRServo.class, "kicker2");
 
-//        DcMotor launcher = hardwareMap.dcMotor.get("launcher");
-//        launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        DcMotorEx launcher = (DcMotorEx) hardwareMap.dcMotor.get("launcher");
+        DcMotor launcher = hardwareMap.dcMotor.get("launcher");
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        launcher.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        launcher.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
-
-        launcher.setVelocityPIDFCoefficients(kP, kI, kD, kF);
-        ElapsedTime timer = new ElapsedTime();
-
-        RED_PGP_main.SimplePIDController pidController = new RED_PGP_main.SimplePIDController();
 
         Servo rotator = hardwareMap.get(Servo.class, "rotator");
 
-//
-//        DcMotorControllerEx motorControllerExR = (DcMotorControllerEx)launcher.getController();
-//        int motorIndexR = ((DcMotorEx)launcher).getPortNumber();
-//
-//        PIDFCoefficients pidfNewR = new PIDFCoefficients(NEWR_P, NEWR_I, NEWR_D, NEWR_F);
-//        motorControllerExR.setPIDFCoefficients(motorIndexR, DcMotor.RunMode.RUN_USING_ENCODER, pidfNewR);
-//
-//        ElapsedTime timer = new ElapsedTime();
+        //accel forward to target speed
+        final double NEWR_P = 2;
+        //ability to change intertia (change direction
+        final double NEWR_I = 0.2;
+        //jerk lmao
+        final double NEWR_D = 0.7;
+        //idek
+        final double NEWR_F = 20.0;
+
+        DcMotorControllerEx motorControllerExR = (DcMotorControllerEx)launcher.getController();
+        int motorIndexR = ((DcMotorEx)launcher).getPortNumber();
+
+        PIDFCoefficients pidfNewR = new PIDFCoefficients(NEWR_P, NEWR_I, NEWR_D, NEWR_F);
+        motorControllerExR.setPIDFCoefficients(motorIndexR, DcMotor.RunMode.RUN_USING_ENCODER, pidfNewR);
+
+        ElapsedTime timer = new ElapsedTime();
 
         //color sensor
-        int purple = 0;
         int green = 0;
+        int purple = 0;
 
         //intake & spindex
         int kicker_start = 0;
         boolean adjusted = false;
         int ballPickUp = 1;
         boolean onetwothreeShoot = false;
-        boolean twoonethreeShoot = false;
+        boolean threetwooneShoot = false;
         boolean twothreeoneShoot = false;
         boolean detected = false;
         boolean sensing = false;
@@ -133,7 +108,7 @@ public class RED_PGP_main extends LinearOpMode {
         double spinTime = 0.4;
         boolean start = false;
         boolean restart = false;
-        boolean onlyKicker = false;
+        boolean onlyKicker= false;
 
         //launching
         boolean launchDistanceChange = false;
@@ -143,10 +118,6 @@ public class RED_PGP_main extends LinearOpMode {
         double launchPosition = 0.4;
         double launchPower = 0;
         double distance = 0;
-
-        double currentVelocity = 0;
-        double power = 0;
-        double distanceLaunch = 0;
 
         DcMotor frontLeft = hardwareMap.dcMotor.get("frontLeft");
         DcMotor backLeft = hardwareMap.dcMotor.get("backLeft");
@@ -160,7 +131,6 @@ public class RED_PGP_main extends LinearOpMode {
 
         frontRight.setDirection(DcMotorSimple.Direction.REVERSE);
         backRight.setDirection(DcMotorSimple.Direction.REVERSE);
-
 
         telemetry.addData("Status", "Initialized");
         telemetry.update();
@@ -195,13 +165,6 @@ public class RED_PGP_main extends LinearOpMode {
                 kicker_start = 2;
             }
 
-            if(launchDistanceChange) {
-                currentVelocity = launcher.getVelocity();
-                power = pidController.update(distanceLaunch, currentVelocity);
-                launcher.setVelocity(power);
-            }
-
-//---------------------------------------GAMEPAD 1----------------------------------------
             double y = gamepad1.left_stick_y; // Remember, Y stick value is reversed
             double x = -gamepad1.left_stick_x;
             double rx = -gamepad1.right_stick_x;
@@ -240,7 +203,7 @@ public class RED_PGP_main extends LinearOpMode {
             frontRight.setPower(frontRightPower* 1);
             backRight.setPower(backRightPower* 1);
 
-
+//---------------------------------------GAMEPAD 1----------------------------------------
             //intake & spindex
             if(hue < 245 && hue > 220){
                 purple++;
@@ -269,11 +232,11 @@ public class RED_PGP_main extends LinearOpMode {
             }
 
             if(gamepad1.y){
-                spindex.setPosition(0.1);
+                spindex.setPosition(1);
                 intake.setPower(1);
                 ballPickUp = 1;
                 onetwothreeShoot = false;
-                twoonethreeShoot = false;
+                threetwooneShoot = false;
                 twothreeoneShoot = false;
                 adjusted = false;
                 sensing = true;
@@ -318,8 +281,8 @@ public class RED_PGP_main extends LinearOpMode {
                 intake.setPower(-1);
             }
 
-            //green ball first
             if(sensing) {
+                //green ball first
                 if (color_detected.equals("Green") && ballPickUp == 1 && !adjusted && timer.time() > 1) {
                     onetwothreeShoot = true;
                     adjusted = true;
@@ -327,15 +290,15 @@ public class RED_PGP_main extends LinearOpMode {
                     ballPickUp = 2;
                     timer.reset();
                 } else if (adjusted && ballPickUp == 2 && detected && (timer.time() > 1)) {
-                    spindex.setPosition(1);
+                    spindex.setPosition(0.1);
                     ballPickUp = 3;
                     timer.reset();
                 } else if (ballPickUp == 3 && detected && (timer.time() > 1)) {
                     intake.setPower(-1);
                     if (onetwothreeShoot) {
                         spindex.setPosition(0);
-                    } else if (twoonethreeShoot) {
-                        spindex.setPosition(0.43);
+                    } else if (threetwooneShoot) {
+                        spindex.setPosition(0.87);
                     } else if (twothreeoneShoot) {
                         spindex.setPosition(0.43);
                     }
@@ -343,19 +306,19 @@ public class RED_PGP_main extends LinearOpMode {
                     in_position = true;
                     sensing = false;
                 } else if (color_detected.equals("Purple") && ballPickUp == 1 && !adjusted) {
-                    spindex.setPosition(1);
+                    spindex.setPosition(0.56);
                     ballPickUp = 2;
                     timer.reset();
                 } else if (color_detected.equals("Green") && ballPickUp == 2 && !adjusted && (timer.time() > 1)) {
-                    twoonethreeShoot = true;
+                    threetwooneShoot = true;
                     adjusted = true;
-                    spindex.setPosition(0.56);
+                    spindex.setPosition(0.1);
                     ballPickUp = 3;
                     timer.reset();
                 } else if (color_detected.equals("Purple") && ballPickUp == 2 && !adjusted && (timer.time() > 1)) {
                     twothreeoneShoot = true;
                     adjusted = true;
-                    spindex.setPosition(0.56);
+                    spindex.setPosition(0.1);
                     ballPickUp = 3;
                     timer.reset();
                 }
@@ -370,7 +333,6 @@ public class RED_PGP_main extends LinearOpMode {
                 sensing = false;
                 spindex.setPosition(0.1);
             }
-
 
             if(gamepad1.dpad_down){
                 sensing = false;
@@ -404,7 +366,7 @@ public class RED_PGP_main extends LinearOpMode {
                 spindex.setPosition(1);
             }
 
-            //MANUAL KICKER
+            //manual kicker
             if(gamepad2.y){
                 kicker_continuous.setPower(1);
                 kicker_rotate.setPosition(0.6);
@@ -421,7 +383,7 @@ public class RED_PGP_main extends LinearOpMode {
             if(gamepad2.right_bumper){
                 launchDistanceChange = true;
                 //may need to delete
-//                voltChange = voltSpeed(controlHubVoltageSensor);
+                voltChange = voltSpeed(controlHubVoltageSensor);
             }
 
             if(gamepad2.left_bumper){
@@ -430,47 +392,21 @@ public class RED_PGP_main extends LinearOpMode {
                 launcher.setPower(0);
             }
 
-            if(camera_on && launchDistanceChange && llResult != null && llResult.isValid()) {
-                //distance = getDistanceFromTags(llResult.getTa());
-
-                currentVelocity = launcher.getVelocity();
+            if(camera_on && launchDistanceChange && llResult != null && llResult.isValid()){
                 distance = getDistanceFromTags(llResult.getTa());
 
-//                if(distance >= 125) {
-                distanceLaunch = ((0.000651046 * Math.pow(distance, 3)) - (0.215467 * Math.pow(distance, 2)) + (24.03551 * distance) + 43.22422);
-//                } else {
-//                    distanceLaunch = ((0.00053435 * Math.pow(distance, 3)) - (0.174103 * Math.pow(distance, 2)) + (19.52556 * distance) + 197.18911);
-//                }
-                // Calculate motor power using the PID controller
+                if(secondThird <= 1){
+                    launchPower = (0.0024 * (distance)) + voltChange;
+                } else if (secondThird == 2) {
+                    launchPower = (0.0024 * distance) + voltChange + 0.18;
+                } else {
+                    launchPower = (0.0024 * distance) + voltChange + 0.13;
+                }
 
-//                } else {
-//                    distanceLaunch = ((0.00053435 * Math.pow(distance, 3)) - (0.174103 * Math.pow(distance, 2)) + (19.52556 * distance) + 197.18911);
-//                }
-                // Calculate motor power using the PID controller
-//                if(distance > 120){
-//                    distance = distance - 20;
-//                }
-
-//                if(secondThird <= 1){
-//                    launchPower = (0.0024 * (distance)) + voltChange;
-//                } else if (secondThird == 2) {
-//                    launchPower = (0.0024 * distance) + voltChange + 0.18;
-//                } else {
-//                    launchPower = (0.0024 * distance) + voltChange + 0.13;
-//                }
-
-            } else if (launchDistanceChange && llResult != null){
-                distanceLaunch = 1045;
-//                    distanceLaunch = ((0.00053435 * Math.pow(distance, 3)) - (0.174103 * Math.pow(distance, 2)) + (19.52556 * distance) + 197.18911);
-//                }
-                // Calculate motor power using the PID controller
-                power = pidController.update(distanceLaunch, currentVelocity);
-                launcher.setVelocity(power);
+                launcher.setPower(launchPower);
+            } else if(launchDistanceChange){
+                launcher.setPower((0.0025 * 110) + voltChange);
             }
-//            } else if(launchDistanceChange){
-//                launcher.setPower((0.0024 * 110) + voltChange);
-//            }
-
 
             //stop auto launch sequence
             if(gamepad2.a){
@@ -483,6 +419,7 @@ public class RED_PGP_main extends LinearOpMode {
                 secondThird = 0;
             }
 
+            //START AUTO LAUNCH SEQUENCE
             if(gamepad2.b && !start){
                 if(!restart) {
                     spinToLaunch = false;
@@ -495,16 +432,16 @@ public class RED_PGP_main extends LinearOpMode {
                     start = true;
                     secondThird = 0;
 
-                    if(!onetwothreeShoot && !twoonethreeShoot && !twothreeoneShoot){
+                    if(!onetwothreeShoot && !twothreeoneShoot && !threetwooneShoot){
                         onetwothreeShoot = true;
                     }
 
                     if (!in_position) {
                         if (onetwothreeShoot) {
                             spindex.setPosition(0);
+                        } else if (threetwooneShoot) {
+                            spindex.setPosition(0.87);
                         } else if (twothreeoneShoot) {
-                            spindex.setPosition(0.43);
-                        } else if (twoonethreeShoot) {
                             spindex.setPosition(0.43);
                         }
 
@@ -528,8 +465,8 @@ public class RED_PGP_main extends LinearOpMode {
             if(start && in_position && !stopLaunchSequence){
                 if(onetwothreeShoot){
                     spindex.setPosition(0);
-                } else if(twoonethreeShoot){
-                    spindex.setPosition(0.43);
+                } else if(threetwooneShoot){
+                    spindex.setPosition(0.87);
                 } else if(twothreeoneShoot){
                     spindex.setPosition(0.43);
                 }
@@ -562,8 +499,8 @@ public class RED_PGP_main extends LinearOpMode {
             if(!stopLaunchSequence && current_state == 1 && timer.time() > 0.3){
                 if(onetwothreeShoot){
                     spindex.setPosition(0.43);
-                } else if(twoonethreeShoot){
-                    spindex.setPosition(0);
+                } else if(threetwooneShoot){
+                    spindex.setPosition(0.43);
                 } else if (twothreeoneShoot){
                     spindex.setPosition(0.87);
                 }
@@ -578,9 +515,8 @@ public class RED_PGP_main extends LinearOpMode {
                 wait_time = 1;
                 if(onetwothreeShoot) {
                     spindex.setPosition(0.87);
-                } else if(twoonethreeShoot){
-                    spindex.setPosition(0.87);
-                    spinTime = 0.6;
+                } else if(threetwooneShoot){
+                    spindex.setPosition(0);
                 } else if(twothreeoneShoot){
                     spindex.setPosition(0);
                     spinTime = 0.6;
@@ -602,6 +538,7 @@ public class RED_PGP_main extends LinearOpMode {
             }
 
         }
+
     }
 
     public double getDistanceFromTags(double ta){
@@ -622,37 +559,11 @@ public class RED_PGP_main extends LinearOpMode {
             power = ((-0.0600978 * voltage) + 0.844191);
         }
 
-//        power = (-0.0432592 * voltage) + 0.635392;
-        //connects 12.4 and 13.7
-        //might need to change to connect 12.4 and 13.4 or smth like that
-
-//        double power = (-0.00979891 * Math.pow(voltage, 2)) + (0.177689 * voltage) - 0.590611;
-
         if(power < 0){
             return 0;
         } else {
             return power;
         }
-
-//        return (-0.00777925 * Math.pow(voltage, 2)) + (0.12726 * voltage) -0.301808;
-//
-//        //TEMP FIX TEST PLS
-//        if(voltage >= 13.5){
-//            return 0;
-//        } else if(voltage >= 13.1){
-//            return 0.05;
-//        } else if (voltage >= 12.6){
-//            return 0.1;
-//        } else if (voltage >= 12.1){
-//            return 0.125;
-//        } else if (voltage >= 11.6){
-//            return 0.15;
-//        } else if (voltage >= 11.1){
-//            return 0.175;
-//        } else if (voltage >= 10.6){
-//            return 0.2;
-//        } else {
-//            return 0.05;
-//        }
     }
+
 }

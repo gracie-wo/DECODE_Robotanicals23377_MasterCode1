@@ -2,7 +2,6 @@ package org.firstinspires.ftc.teamcode.main.auto;
 
 import androidx.annotation.NonNull;
 
-import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.Action;
 import com.acmerobotics.roadrunner.ParallelAction;
@@ -16,6 +15,7 @@ import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
 import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -29,13 +29,15 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 import org.firstinspires.ftc.teamcode.MecanumDrive;
+import org.firstinspires.ftc.teamcode.main.teleop.BLUE_GPP_main;
 
 import java.util.List;
 
+@Disabled
 
-@Config
-@Autonomous(name = "RED front", group = "Red Main")
-public class RedFront extends LinearOpMode {
+//@Config
+@Autonomous(name = "VelocityTraining", group = "Red Main")
+public class VelocityTraining extends LinearOpMode {
 
     //limelight
     String pattern = "GPP";
@@ -158,9 +160,9 @@ public class RedFront extends LinearOpMode {
         public Action switchPipeline0(){
             return new SwitchPipeline0();
         }
-     }
+    }
 
-     //------------------------------------MOTORS--------------------------------------------
+    //------------------------------------MOTORS--------------------------------------------
     public class Intake {
         private DcMotorEx intake;
 
@@ -202,24 +204,29 @@ public class RedFront extends LinearOpMode {
         private VoltageSensor controlHubVoltageSensor;
         private double launchPower;
 
-        final double NEWR_P = 2;
+        //accel forward to target speed
+        final double kP = 12;
         //ability to change intertia (change direction
-        final double NEWR_I = 0.2;
+        final double kI = 0.0;
         //jerk lmao
-        final double NEWR_D = 0.7;
+        final double kD = 0.01;
         //idek
-        final double NEWR_F = 20.0;
+        final double kF = 1.0;
+        VelocityTraining.SimplePIDController pidController = new  VelocityTraining.SimplePIDController();
+
+
 
         public Launcher(HardwareMap hardwareMap){
             launcher = hardwareMap.get(DcMotorEx.class, "launcher");
             launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-
             DcMotorControllerEx motorControllerExR = (DcMotorControllerEx)launcher.getController();
             int motorIndexR = ((DcMotorEx)launcher).getPortNumber();
 
-            PIDFCoefficients pidfNewR = new PIDFCoefficients(NEWR_P, NEWR_I, NEWR_D, NEWR_F);
-            motorControllerExR.setPIDFCoefficients(motorIndexR, DcMotor.RunMode.RUN_USING_ENCODER, pidfNewR);
+            PIDFCoefficients pidfNewR = new PIDFCoefficients(kP, kI, kD, kF);
+            launcher.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+            launcher.setVelocityPIDFCoefficients(kP, kI, kD, kF);
+//            motorControllerExR.setPIDFCoefficients(motorIndexR, DcMotor.RunMode.RUN_USING_ENCODER, pidfNewR);
 
             controlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
             voltChange = voltSpeed(controlHubVoltageSensor);
@@ -230,25 +237,18 @@ public class RedFront extends LinearOpMode {
         public class LaunchOnOne implements Action{
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
-//                llResult = limelight.getLatestResult();
-                voltChange = voltSpeed(controlHubVoltageSensor);
+
+//                  llResult = limelight.getLatestResult();
+//                voltChange = voltSpeed(controlHubVoltageSensor);
 //
 //                if(llResult != null && llResult.isValid()){
 //                    double distance = getDistanceFromTags(llResult.getTa());
 //                    launchPower = (0.0025 * (distance)) + voltChange;
 //                } else {
-                launchPower = (0.0024 * 135) + voltChange;
+//                launchPower = (0.0024 * 135) + voltChange;
 //                }
                 //185
-//                currentVelocity = launcher.getVelocity();
-//                distance = getDistanceFromTags(llResult.getTa());
-
-//                if(distance >= 125) {
-//                sleepTimer.reset();
-//                while(sleepTimer.seconds() < 3) {
-//                    launchPower = ((0.000651046 * Math.pow(distance, 3)) - (0.215467 * Math.pow(distance, 2)) + (24.03551 * distance) + 43.22422);
-                launcher.setPower(launchPower);
-//                }
+                launcher.setVelocity(965);
                 return false;
             }
         }
@@ -318,7 +318,17 @@ public class RedFront extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 //VALUE OF 185 MAY NEED TO BE ADJUSTED
-                launcher.setPower((0.0024 * 179) + voltChange);
+
+                currentVelocity = launcher.getVelocity();
+                distance = getDistanceFromTags(llResult.getTa());
+
+                //                if(distance >= *125) {
+                sleepTimer.reset();
+
+                while(sleepTimer.seconds() < 1) {
+                    launchPower = ((0.000651046 * Math.pow(distance, 3)) - (0.215467 * Math.pow(distance, 2)) + (24.03551 * distance) + 43.22422);
+                    launcher.setVelocity(launchPower);
+                }
                 return false;
             }
         }
@@ -331,7 +341,7 @@ public class RedFront extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 //VALUE OF 185 MAY NEED TO BE ADJUSTED
-                launcher.setPower((0.0024 * 220) + voltChange);
+                launcher.setPower((0.0024 * 235) + voltChange);
                 return false;
             }
         }
@@ -344,7 +354,7 @@ public class RedFront extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 //VALUE OF 185 MAY NEED TO BE ADJUSTED
-                launcher.setPower((0.0024 * 205  ) + voltChange);
+                launcher.setPower((0.0024 * 227) + voltChange);
                 return false;
             }
         }
@@ -746,7 +756,7 @@ public class RedFront extends LinearOpMode {
 
 
     }
-     public class KickerCont {
+    public class KickerCont {
         private CRServo kickerCont;
 
         public KickerCont(HardwareMap hardwareMap){
@@ -847,23 +857,23 @@ public class RedFront extends LinearOpMode {
                 .strafeToLinearHeading (new Vector2d(-28, 33), Math.toRadians(-25));
 
         TrajectoryActionBuilder one = launch1.fresh()
-                .strafeToLinearHeading (new Vector2d(-34, 30), Math.toRadians(-100))
-                .strafeToLinearHeading (new Vector2d(-34, 23), Math.toRadians(-100));
+                .strafeToLinearHeading (new Vector2d(-36, 30), Math.toRadians(-100))
+                .strafeToLinearHeading (new Vector2d(-36, 23), Math.toRadians(-100));
         TrajectoryActionBuilder two = one.fresh()
-                .strafeToConstantHeading (new Vector2d(-32, 19));
+                .strafeToConstantHeading (new Vector2d(-34, 19));
         TrajectoryActionBuilder three = two.fresh()
-                .strafeToConstantHeading (new Vector2d(-29, 6));
+                .strafeToConstantHeading (new Vector2d(-31, 6));
 
         TrajectoryActionBuilder launch2 = three.fresh()
                 .strafeToLinearHeading (new Vector2d(-28, 33), Math.toRadians(-55));
 
         TrajectoryActionBuilder one2 = launch2.fresh()
-                .strafeToLinearHeading (new Vector2d(-58, 30), Math.toRadians(-95))
-                .strafeToLinearHeading (new Vector2d(-58, 25), Math.toRadians(-95));
+                .strafeToLinearHeading (new Vector2d(-61, 29), Math.toRadians(-95))
+                .strafeToLinearHeading (new Vector2d(-61, 27), Math.toRadians(-95));
         TrajectoryActionBuilder two2 = one2.fresh()
-                .strafeToConstantHeading (new Vector2d(-56, 21));
+                .strafeToConstantHeading (new Vector2d(-59, 22));
         TrajectoryActionBuilder three2 = two2.fresh()
-                .strafeToConstantHeading (new Vector2d(-54, 10));
+                .strafeToConstantHeading (new Vector2d(-57, 7));
 
         TrajectoryActionBuilder launch3 = three2.fresh()
                 .strafeToLinearHeading (new Vector2d(-28, 33), Math.toRadians(-55));
@@ -895,7 +905,7 @@ public class RedFront extends LinearOpMode {
         Actions.runBlocking(
                 new SequentialAction(
                         new ParallelAction(
-                                launcher.launchOnStart(),
+//                                launcher.launchOnStart(),
                                 new SequentialAction(
                                         new ParallelAction(
                                                 launch1A,
@@ -921,43 +931,40 @@ public class RedFront extends LinearOpMode {
                                         kickerRotate.kickerRotateUp(),
                                         new SleepAction(0.5),
                                         kickerRotate.kickerRotateDown(),
-                                        new SleepAction(0.3)
-                                )
-                        ),
-
-                        new ParallelAction(
-//                                launcher.launchOnOne(),
-                                launcher.launchOnTwo(),
-                                spindex.startSpindexLaunchTwo(),
-                                new SleepAction(0.4)
-
-                        ),
-
-                        new ParallelAction(
-                                launcher.launchOnTwo(),
-                                new SequentialAction(
+                                        new SleepAction(0.3),
+//                                )
+//                        ),
+//
+//                        new ParallelAction(
+                                        spindex.startSpindexLaunchTwo(),
+                                        new SleepAction(0.4),
+//
+//                        ),
+//
+//                        new ParallelAction(
+//                                new SequentialAction(
                                         kickerRotate.kickerRotateUp(),
                                         new SleepAction(0.5),
                                         kickerRotate.kickerRotateDown(),
-                                        new SleepAction(0.3)
-                                )
-                        ),
+                                        new SleepAction(0.3),
+//                                )
+//                        ),
 
-                        new ParallelAction(
+//                        new ParallelAction(
 //                                launcher.launchOnOne(),
-                                launcher.launchOnThree(),
-                                spindex.startSpindexLaunchThree(),
-                                new SleepAction(0.6)
-                        ),
-
-                        new ParallelAction(
-                                launcher.launchOnThree(),
-                                new SequentialAction(
+                                        spindex.startSpindexLaunchThree(),
+                                        new SleepAction(0.6),
+//                        ),
+//
+//                        new ParallelAction(
+//                                new SequentialAction(
+                                        launcher.launchOnOne(),
                                         kickerRotate.kickerRotateUp(),
                                         new SleepAction(0.5),
+                                        launcher.launchOnOne(),
                                         kickerRotate.kickerRotateDown(),
                                         new SleepAction(0.3)
-                                )
+                        )
                         ),
 
                         //go to intake 1
@@ -984,7 +991,8 @@ public class RedFront extends LinearOpMode {
                         ),
 
                         new ParallelAction(
-                                launcher.launchOn2(),
+//                                launcher.launchOn2(),
+//                                launcher.launchOnOne(),
                                 new SequentialAction(
                                         spindex.spindexIntakeThreeStay(),
                                         //may cause  error
@@ -1003,35 +1011,35 @@ public class RedFront extends LinearOpMode {
                                         kickerRotate.kickerRotateUp(),
                                         new SleepAction(0.5),
                                         kickerRotate.kickerRotateDown(),
-                                        new SleepAction(0.3)
-                                )
-                        ),
-
-                        new ParallelAction(
-                                launcher.launchOnTwo(),
-                                spindex.spindexLaunchTwo(),
-                                new SleepAction(0.4)
-                        ),
-
-                        new ParallelAction(
-                                launcher.launchOnTwo(),
-                                new SequentialAction(
+                                        new SleepAction(0.3),
+//                                )
+//                        ),
+//
+//                        new ParallelAction(
+//                                launcher.launchOnTwo(),
+                                        spindex.spindexLaunchTwo(),
+                                        new SleepAction(0.4),
+//                        ),
+//
+//                        new ParallelAction(
+//                                launcher.launchOnTwo(),
+//                                new SequentialAction(
                                         kickerRotate.kickerRotateUp(),
                                         new SleepAction(0.5),
                                         kickerRotate.kickerRotateDown(),
-                                        new SleepAction(0.3)
-                                )
-                        ),
+                                        new SleepAction(0.3),
+//                                )
+//                        ),
 
-                        new ParallelAction(
-                                launcher.launchOnThree(),
-                                spindex.spindexLaunchThree(),
-                                new SleepAction(0.4)
-                        ),
+//                        new ParallelAction(
+//                                launcher.launchOnThree(),
+                                        spindex.spindexLaunchThree(),
+                                        new SleepAction(0.4),
+//                        ),
 
-                        new ParallelAction(
-                                launcher.launchOnThree(),
-                                new SequentialAction(
+//                        new ParallelAction(
+//                                launcher.launchOnThree(),
+//                                new SequentialAction(
                                         kickerRotate.kickerRotateUp(),
                                         new SleepAction(0.5),
                                         kickerRotate.kickerRotateDown(),
@@ -1071,7 +1079,7 @@ public class RedFront extends LinearOpMode {
                                 ),
                                 kickerCont.kickerContOn(),
                                 rotator.rotateLaunch(),
-                                launcher.launchOn3(),
+//                                launcher.launchOnStart(),
                                 launch3A
                         ),
 
@@ -1082,35 +1090,35 @@ public class RedFront extends LinearOpMode {
                                         kickerRotate.kickerRotateUp(),
                                         new SleepAction(0.5),
                                         kickerRotate.kickerRotateDown(),
-                                        new SleepAction(0.3)
-                                )
-                        ),
-
-                        new ParallelAction(
-                                launcher.launchOnTwo(),
-                                spindex.spindexLaunchTwo(),
-                                new SleepAction(0.4)
-                        ),
-
-                        new ParallelAction(
-                                launcher.launchOnTwo(),
-                                new SequentialAction(
+                                        new SleepAction(0.3),
+//                                )
+//                        ),
+//
+//                        new ParallelAction(
+//                                launcher.launchOnTwo(),
+                                        spindex.spindexLaunchTwo(),
+                                        new SleepAction(0.4),
+//                        ),
+//
+//                        new ParallelAction(
+//                                launcher.launchOnTwo(),
+//                                new SequentialAction(
                                         kickerRotate.kickerRotateUp(),
                                         new SleepAction(0.5),
                                         kickerRotate.kickerRotateDown(),
-                                        new SleepAction(0.3)
-                                )
-                        ),
-
-                        new ParallelAction(
-                                launcher.launchOnThree(),
-                                spindex.spindexLaunchThree(),
-                                new SleepAction(0.4)
-                        ),
-
-                        new ParallelAction(
-                                launcher.launchOnThree(),
-                                new SequentialAction(
+                                        new SleepAction(0.3),
+//                                )
+//                        ),
+//
+//                        new ParallelAction(
+//                                launcher.launchOnThree(),
+                                        spindex.spindexLaunchThree(),
+                                        new SleepAction(0.4),
+//                        ),
+//
+//                        new ParallelAction(
+//                                launcher.launchOnThree(),
+//                                new SequentialAction(
                                         kickerRotate.kickerRotateUp(),
                                         new SleepAction(0.5),
                                         kickerRotate.kickerRotateDown(),

@@ -24,6 +24,29 @@ import org.firstinspires.ftc.teamcode.GoBildaPinpointDriver;
 
 @TeleOp(name = "Red GPP", group = "Red Main")
 public class RED_GPP_main extends LinearOpMode {
+    final double kP = 12;
+    //ability to change intertia (change direction
+    final double kI = 0.0;
+    //jerk lmao
+    final double kD = 0.01;
+    //idek
+    final double kF = 1;
+    private final ElapsedTime timer = new ElapsedTime();
+    private double lastError = 0;
+    private double integralSum = 0;
+    public class SimplePIDController {
+        public double update(double reference, double state) {
+            double error = reference - state;
+            integralSum += error * timer.seconds(); // Integrate error over time
+            double derivative = (error - lastError) / timer.seconds(); // Calculate derivative of error
+            lastError = error;
+            timer.reset(); // Reset the timer for the next loop iteration
+
+            // Calculate output power using PIDF formula
+            double output = (error * kP) + (derivative * kD) + (integralSum * kI) + (reference * kF);
+            return output;
+        }
+    }
     @Override
     public void runOpMode() throws InterruptedException {
         IMU imu = hardwareMap.get(IMU.class, "imu");
@@ -59,27 +82,36 @@ public class RED_GPP_main extends LinearOpMode {
         Servo kicker_rotate = hardwareMap.get(Servo.class, "kicker1");
         CRServo kicker_continuous = hardwareMap.get(CRServo.class, "kicker2");
 
-        DcMotor launcher = hardwareMap.dcMotor.get("launcher");
+//        DcMotor launcher = hardwareMap.dcMotor.get("launcher");
+//        launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        DcMotorEx launcher = (DcMotorEx) hardwareMap.dcMotor.get("launcher");
         launcher.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        launcher.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        launcher.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
+
+        launcher.setVelocityPIDFCoefficients(kP, kI, kD, kF);
+        ElapsedTime timer = new ElapsedTime();
+
+        RED_GPP_main.SimplePIDController pidController = new RED_GPP_main.SimplePIDController();
 
         Servo rotator = hardwareMap.get(Servo.class, "rotator");
 
-        //accel forward to target speed
-        final double NEWR_P = 2;
-        //ability to change intertia (change direction
-        final double NEWR_I = 0.2;
-        //jerk lmao
-        final double NEWR_D = 0.7;
-        //idek
-        final double NEWR_F = 20.0;
+//        //accel forward to target speed
+//        final double NEWR_P = 2;
+//        //ability to change intertia (change direction
+//        final double NEWR_I = 0.2;
+//        //jerk lmao
+//        final double NEWR_D = 0.7;
+//        //idek
+//        final double NEWR_F = 20.0;
 
-        DcMotorControllerEx motorControllerExR = (DcMotorControllerEx)launcher.getController();
-        int motorIndexR = ((DcMotorEx)launcher).getPortNumber();
+//        DcMotorControllerEx motorControllerExR = (DcMotorControllerEx)launcher.getController();
+//        int motorIndexR = ((DcMotorEx)launcher).getPortNumber();
+//
+//        PIDFCoefficients pidfNewR = new PIDFCoefficients(NEWR_P, NEWR_I, NEWR_D, NEWR_F);
+//        motorControllerExR.setPIDFCoefficients(motorIndexR, DcMotor.RunMode.RUN_USING_ENCODER, pidfNewR);
 
-        PIDFCoefficients pidfNewR = new PIDFCoefficients(NEWR_P, NEWR_I, NEWR_D, NEWR_F);
-        motorControllerExR.setPIDFCoefficients(motorIndexR, DcMotor.RunMode.RUN_USING_ENCODER, pidfNewR);
-
-        ElapsedTime timer = new ElapsedTime();
+//        ElapsedTime timer = new ElapsedTime();
 
         //color sensor
         int green = 0;
@@ -116,6 +148,10 @@ public class RED_GPP_main extends LinearOpMode {
         double launchPosition = 0.4;
         double launchPower = 0;
         double distance = 0;
+
+        double currentVelocity = 0;
+        double power = 0;
+        double distanceLaunch = 0;
 
         DcMotor frontLeft = hardwareMap.dcMotor.get("frontLeft");
         DcMotor backLeft = hardwareMap.dcMotor.get("backLeft");
@@ -161,6 +197,12 @@ public class RED_GPP_main extends LinearOpMode {
             if(kicker_start == 1 && timer.time() > 0.1){
                 kicker_continuous.setPower(0);
                 kicker_start = 2;
+            }
+
+            if(launchDistanceChange) {
+                currentVelocity = launcher.getVelocity();
+                power = pidController.update(distanceLaunch, currentVelocity);
+                launcher.setVelocity(power);
             }
 
             double y = gamepad1.left_stick_y; // Remember, Y stick value is reversed
@@ -381,7 +423,7 @@ public class RED_GPP_main extends LinearOpMode {
             if(gamepad2.right_bumper){
                 launchDistanceChange = true;
                 //may need to delete
-                voltChange = voltSpeed(controlHubVoltageSensor);
+//                voltChange = voltSpeed(controlHubVoltageSensor);
             }
 
             if(gamepad2.left_bumper){
@@ -391,19 +433,41 @@ public class RED_GPP_main extends LinearOpMode {
             }
 
             if(camera_on && launchDistanceChange && llResult != null && llResult.isValid()){
+                //distance = getDistanceFromTags(llResult.getTa());
+
+                currentVelocity = launcher.getVelocity();
                 distance = getDistanceFromTags(llResult.getTa());
 
-                if(secondThird <= 1){
-                    launchPower = (0.0024 * (distance)) + voltChange;
-                } else if (secondThird == 2) {
-                    launchPower = (0.0024 * distance) + voltChange + 0.18;
-                } else {
-                    launchPower = (0.0024 * distance) + voltChange + 0.13;
-                }
+//                if(distance >= 125) {
+                distanceLaunch = ((0.000651046 * Math.pow(distance, 3)) - (0.215467 * Math.pow(distance, 2)) + (24.03551 * distance) + 43.22422);
+//                } else {
+//                    distanceLaunch = ((0.00053435 * Math.pow(distance, 3)) - (0.174103 * Math.pow(distance, 2)) + (19.52556 * distance) + 197.18911);
+//                }
+                // Calculate motor power using the PID controller
 
-                launcher.setPower(launchPower);
-            } else if(launchDistanceChange){
-                launcher.setPower((0.0025 * 175) + voltChange);
+//                } else {
+//                    distanceLaunch = ((0.00053435 * Math.pow(distance, 3)) - (0.174103 * Math.pow(distance, 2)) + (19.52556 * distance) + 197.18911);
+//                }
+                // Calculate motor power using the PID controller
+//                if(distance > 120){
+//                    distance = distance - 20;
+//                }
+
+//                if(secondThird <= 1){
+//                    launchPower = (0.0024 * (distance)) + voltChange;
+//                } else if (secondThird == 2) {
+//                    launchPower = (0.0024 * distance) + voltChange + 0.18;
+//                } else {
+//                    launchPower = (0.0024 * distance) + voltChange + 0.13;
+//                }
+
+            } else if (launchDistanceChange && llResult != null) {
+                distanceLaunch = 1045;
+//                    distanceLaunch = ((0.00053435 * Math.pow(distance, 3)) - (0.174103 * Math.pow(distance, 2)) + (19.52556 * distance) + 197.18911);
+//                }
+                // Calculate motor power using the PID controller
+                power = pidController.update(distanceLaunch, currentVelocity);
+                launcher.setVelocity(power);
             }
 
             //stop auto launch sequence

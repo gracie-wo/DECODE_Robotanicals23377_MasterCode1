@@ -208,7 +208,7 @@ public class BlueFront extends LinearOpMode {
 //                    double distance = getDistanceFromTags(llResult.getTa());
 //                    launchPower = (0.0025 * (distance)) + voltChange;
 //                } else {
-                launchPower = (0.0024 * 140) + voltChange;
+                launchPower = (0.0024 * 135) + voltChange;
 //                }
                 //185
                 launcher.setPower(launchPower);
@@ -231,7 +231,7 @@ public class BlueFront extends LinearOpMode {
 //                    double distance = getDistanceFromTags(llResult.getTa());
 //                    launchPower = (0.0025 * (distance)) + voltChange + 0.18;
 //                } else {
-                launchPower = (0.0024 * 140) + voltChange + 0.18;
+                launchPower = (0.0024 * 135) + voltChange + 0.18;
 //                }
                 //185
                 launcher.setPower(launchPower);
@@ -241,6 +241,29 @@ public class BlueFront extends LinearOpMode {
 
         public Action launchOnTwo() {
             return new LaunchOnTwo();
+        }
+
+        public class LaunchOnTwoStart implements Action{
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+//                llResult = limelight.getLatestResult();
+
+                voltChange = voltSpeed(controlHubVoltageSensor);
+////
+//                if(llResult != null && llResult.isValid()){
+//                    double distance = getDistanceFromTags(llResult.getTa());
+//                    launchPower = (0.0025 * (distance)) + voltChange + 0.18;
+//                } else {
+                launchPower = (0.0024 * 135) + voltChange + 0.15;
+//                }
+                //185
+                launcher.setPower(launchPower);
+                return false;
+            }
+        }
+
+        public Action launchOnTwoStart() {
+            return new LaunchOnTwoStart();
         }
 
         public class LaunchOnThree implements Action{
@@ -253,7 +276,7 @@ public class BlueFront extends LinearOpMode {
 //                    double distance = getDistanceFromTags(llResult.getTa());
 //                    launchPower = (0.0025 * (distance)) + voltChange + 0.13;
 //                } else {
-                launchPower = (0.0024 * 140) + voltChange + 0.13;
+                launchPower = (0.0024 * 135) + voltChange + 0.13;
 //                }
                 //185
                 launcher.setPower(launchPower);
@@ -281,7 +304,7 @@ public class BlueFront extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 //VALUE OF 185 MAY NEED TO BE ADJUSTED
-                launcher.setPower((0.0024 * 200) + voltChange);
+                launcher.setPower((0.0024 * 174) + voltChange);
                 return false;
             }
         }
@@ -294,7 +317,7 @@ public class BlueFront extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 //VALUE OF 185 MAY NEED TO BE ADJUSTED
-                launcher.setPower((0.0024 * 250) + voltChange);
+                launcher.setPower((0.0024 * 220) + voltChange);
                 return false;
             }
         }
@@ -307,7 +330,7 @@ public class BlueFront extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 //VALUE OF 185 MAY NEED TO BE ADJUSTED
-                launcher.setPower((0.0024 * 220) + voltChange);
+                launcher.setPower((0.0024 * 198) + voltChange);
                 return false;
             }
         }
@@ -630,7 +653,7 @@ public class BlueFront extends LinearOpMode {
 
         public Rotator(HardwareMap hardwareMap){
             rotator = hardwareMap.get(Servo.class, "rotator");
-            launchPosition = 0.5;
+            launchPosition = 0.3;
             adjusted = false;
         }
 
@@ -674,7 +697,7 @@ public class BlueFront extends LinearOpMode {
         public class RotateLaunch implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet){
-                rotator.setPosition(0.35);
+                rotator.setPosition(0.5);
                 return false;
             }
         }
@@ -686,7 +709,7 @@ public class BlueFront extends LinearOpMode {
         public class RotateLaunchStart implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet){
-                rotator.setPosition(0.75);
+                rotator.setPosition(0.05);
                 return false;
             }
         }
@@ -698,7 +721,7 @@ public class BlueFront extends LinearOpMode {
         public class RotateMosaic implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet){
-                rotator.setPosition(0);
+                rotator.setPosition(0.8);
                 return false;
             }
         }
@@ -805,28 +828,29 @@ public class BlueFront extends LinearOpMode {
         Spindex spindex = new Spindex(hardwareMap);
         Rotator rotator = new Rotator(hardwareMap);
 
+        //may need to increease y by 5 for EVERYTHING
 
         TrajectoryActionBuilder launch1 = drive.actionBuilder(initialPose)
-                .strafeToLinearHeading (new Vector2d(-28, 33), Math.toRadians(25));
+                .strafeToLinearHeading (new Vector2d(-28, -33), Math.toRadians(25));
 
         TrajectoryActionBuilder one = launch1.fresh()
-                .strafeToLinearHeading (new Vector2d(-37, -18), Math.toRadians(90))
-                .strafeToLinearHeading (new Vector2d(-37, -15), Math.toRadians(90));
+                .strafeToLinearHeading (new Vector2d(-34, -25), Math.toRadians(90))
+                .strafeToLinearHeading (new Vector2d(-34, -17), Math.toRadians(90));
         TrajectoryActionBuilder two = one.fresh()
-                .strafeToConstantHeading (new Vector2d(-35, -12));
+                .strafeToConstantHeading (new Vector2d(-32, -13));
         TrajectoryActionBuilder three = two.fresh()
-                .strafeToConstantHeading (new Vector2d(-33, -6));
+                .strafeToConstantHeading (new Vector2d(-30, -6));
 
         TrajectoryActionBuilder launch2 = three.fresh()
                 .strafeToLinearHeading (new Vector2d(-28, -33), Math.toRadians(55));
 
         TrajectoryActionBuilder one2 = launch2.fresh()
-                .strafeToLinearHeading (new Vector2d(-59, -20), Math.toRadians(90))
-                .strafeToLinearHeading (new Vector2d(-59, -17), Math.toRadians(90));
+                .strafeToLinearHeading (new Vector2d(-57, -25), Math.toRadians(90))
+                .strafeToLinearHeading (new Vector2d(-57, -17), Math.toRadians(90));
         TrajectoryActionBuilder two2 = one2.fresh()
-                .strafeToConstantHeading (new Vector2d(-57, -13));
+                .strafeToConstantHeading (new Vector2d(-56, -13));
         TrajectoryActionBuilder three2 = two2.fresh()
-                .strafeToConstantHeading (new Vector2d(-55, -5));
+                .strafeToConstantHeading (new Vector2d(-54, -5));
 
         TrajectoryActionBuilder launch3 = three2.fresh()
                 .strafeToLinearHeading (new Vector2d(-28, -33), Math.toRadians(55));
@@ -889,7 +913,7 @@ public class BlueFront extends LinearOpMode {
                         ),
 
                         new ParallelAction(
-                                launcher.launchOnTwo(),
+                                launcher.launchOnTwoStart(),
                                 spindex.startSpindexLaunchTwo(),
                                 new SleepAction(0.4)
 
@@ -1032,7 +1056,7 @@ public class BlueFront extends LinearOpMode {
                                 ),
                                 kickerCont.kickerContOn(),
                                 rotator.rotateLaunch(),
-                                launcher.launchOnStart(),
+                                launcher.launchOn3(),
                                 launch3A
                         ),
 

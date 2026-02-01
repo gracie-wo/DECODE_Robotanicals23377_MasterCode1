@@ -36,9 +36,9 @@ import org.firstinspires.ftc.teamcode.MecanumDrive;
 
 import java.util.List;
 
-@Disabled
+//@Disabled
 @Config
-@Autonomous(name = "Blue Back (Far)", group = "Autonomous")
+@Autonomous(name = "Blue Back (Far)", group = "Blue Main")
 public class BlueBack extends LinearOpMode {
     private long startTime;
     private void initTime(){
