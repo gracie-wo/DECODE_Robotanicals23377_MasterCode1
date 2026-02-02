@@ -276,7 +276,7 @@ public class BlueFront extends LinearOpMode {
 //                    double distance = getDistanceFromTags(llResult.getTa());
 //                    launchPower = (0.0025 * (distance)) + voltChange + 0.13;
 //                } else {
-                launchPower = (0.0024 * 135) + voltChange + 0.13;
+                launchPower = (0.0024 * 135) + voltChange + 0.1;
 //                }
                 //185
                 launcher.setPower(launchPower);
@@ -304,7 +304,7 @@ public class BlueFront extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 //VALUE OF 185 MAY NEED TO BE ADJUSTED
-                launcher.setPower((0.0024 * 174) + voltChange);
+                launcher.setPower((0.0024 * 177) + voltChange);
                 return false;
             }
         }
@@ -317,7 +317,7 @@ public class BlueFront extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 //VALUE OF 185 MAY NEED TO BE ADJUSTED
-                launcher.setPower((0.0024 * 220) + voltChange);
+                launcher.setPower((0.0024 * 218) + voltChange);
                 return false;
             }
         }
@@ -330,7 +330,7 @@ public class BlueFront extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 //VALUE OF 185 MAY NEED TO BE ADJUSTED
-                launcher.setPower((0.0024 * 198) + voltChange);
+                launcher.setPower((0.0024 * 196) + voltChange);
                 return false;
             }
         }
@@ -706,10 +706,22 @@ public class BlueFront extends LinearOpMode {
             return new RotateLaunch();
         }
 
+        public class RotateLaunch3 implements Action {
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet){
+                rotator.setPosition(0.55);
+                return false;
+            }
+        }
+
+        public Action rotateLaunch3(){
+            return new RotateLaunch3();
+        }
+
         public class RotateLaunchStart implements Action {
             @Override
             public boolean run(@NonNull TelemetryPacket packet){
-                rotator.setPosition(0.05);
+                rotator.setPosition(0.1);
                 return false;
             }
         }
@@ -834,23 +846,23 @@ public class BlueFront extends LinearOpMode {
                 .strafeToLinearHeading (new Vector2d(-28, -33), Math.toRadians(25));
 
         TrajectoryActionBuilder one = launch1.fresh()
-                .strafeToLinearHeading (new Vector2d(-34, -25), Math.toRadians(90))
-                .strafeToLinearHeading (new Vector2d(-34, -17), Math.toRadians(90));
+                .strafeToLinearHeading (new Vector2d(-32, -25), Math.toRadians(100))
+                .strafeToLinearHeading (new Vector2d(-32, -17), Math.toRadians(100));
         TrajectoryActionBuilder two = one.fresh()
-                .strafeToConstantHeading (new Vector2d(-32, -13));
+                .strafeToConstantHeading (new Vector2d(-30, -13));
         TrajectoryActionBuilder three = two.fresh()
-                .strafeToConstantHeading (new Vector2d(-30, -6));
+                .strafeToConstantHeading (new Vector2d(-28, -6));
 
         TrajectoryActionBuilder launch2 = three.fresh()
                 .strafeToLinearHeading (new Vector2d(-28, -33), Math.toRadians(55));
 
         TrajectoryActionBuilder one2 = launch2.fresh()
-                .strafeToLinearHeading (new Vector2d(-57, -25), Math.toRadians(90))
-                .strafeToLinearHeading (new Vector2d(-57, -17), Math.toRadians(90));
+                .strafeToLinearHeading (new Vector2d(-56.5, -29), Math.toRadians(95))
+                .strafeToLinearHeading (new Vector2d(-56.5, -21), Math.toRadians(95));
         TrajectoryActionBuilder two2 = one2.fresh()
-                .strafeToConstantHeading (new Vector2d(-56, -13));
+                .strafeToConstantHeading (new Vector2d(-55.5, -17));
         TrajectoryActionBuilder three2 = two2.fresh()
-                .strafeToConstantHeading (new Vector2d(-54, -5));
+                .strafeToConstantHeading (new Vector2d(-53.5, -6));
 
         TrajectoryActionBuilder launch3 = three2.fresh()
                 .strafeToLinearHeading (new Vector2d(-28, -33), Math.toRadians(55));

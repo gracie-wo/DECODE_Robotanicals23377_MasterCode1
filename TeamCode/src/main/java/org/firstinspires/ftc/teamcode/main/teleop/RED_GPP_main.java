@@ -334,7 +334,7 @@ public class RED_GPP_main extends LinearOpMode {
                     ballPickUp = 3;
                     timer.reset();
                 } else if (ballPickUp == 3 && detected && (timer.time() > 1)) {
-                    intake.setPower(-1);
+//                    intake.setPower(-1);
                     if (onetwothreeShoot) {
                         spindex.setPosition(0);
                     } else if (threetwooneShoot) {

@@ -280,6 +280,30 @@ public class RedFront extends LinearOpMode {
             return new LaunchOnTwo();
         }
 
+        public class LaunchOnTwo2 implements Action{
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+//                llResult = limelight.getLatestResult();
+
+                voltChange = voltSpeed(controlHubVoltageSensor);
+////
+//                if(llResult != null && llResult.isValid()){
+//                    double distance = getDistanceFromTags(llResult.getTa());
+//                    launchPower = (0.0025 * (distance)) + voltChange + 0.18;
+//                } else {
+                launchPower = (0.0024 * 135) + voltChange + 0.13;
+//                }
+                //185
+                launcher.setPower(launchPower);
+                return false;
+            }
+        }
+
+        public Action launchOnTwo2() {
+            return new LaunchOnTwo2();
+        }
+
+
         public class LaunchOnThree implements Action{
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
@@ -302,6 +326,28 @@ public class RedFront extends LinearOpMode {
             return new LaunchOnThree();
         }
 
+        public class LaunchOnThreeHaha implements Action{
+            @Override
+            public boolean run(@NonNull TelemetryPacket packet) {
+//                llResult = limelight.getLatestResult();
+                voltChange = voltSpeed(controlHubVoltageSensor);
+//
+//                if(llResult != null && llResult.isValid()){
+//                    double distance = getDistanceFromTags(llResult.getTa());
+//                    launchPower = (0.0025 * (distance)) + voltChange + 0.13;
+//                } else {
+                launchPower = (0.0024 * 135) + voltChange + 0.1;
+//                }
+                //185
+                launcher.setPower(launchPower);
+                return false;
+            }
+        }
+
+        public Action launchOnThreeHaha() {
+            return new LaunchOnThreeHaha();
+        }
+
         public class LaunchOff implements Action{
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
@@ -318,7 +364,7 @@ public class RedFront extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 //VALUE OF 185 MAY NEED TO BE ADJUSTED
-                launcher.setPower((0.0024 * 179) + voltChange);
+                launcher.setPower((0.0024 * 182) + voltChange);
                 return false;
             }
         }
@@ -344,7 +390,7 @@ public class RedFront extends LinearOpMode {
             @Override
             public boolean run(@NonNull TelemetryPacket packet) {
                 //VALUE OF 185 MAY NEED TO BE ADJUSTED
-                launcher.setPower((0.0024 * 205  ) + voltChange);
+                launcher.setPower((0.0024 * 205) + voltChange);
                 return false;
             }
         }
@@ -850,9 +896,9 @@ public class RedFront extends LinearOpMode {
                 .strafeToLinearHeading (new Vector2d(-34, 30), Math.toRadians(-100))
                 .strafeToLinearHeading (new Vector2d(-34, 23), Math.toRadians(-100));
         TrajectoryActionBuilder two = one.fresh()
-                .strafeToConstantHeading (new Vector2d(-32, 19));
+                .strafeToConstantHeading (new Vector2d(-31, 21));
         TrajectoryActionBuilder three = two.fresh()
-                .strafeToConstantHeading (new Vector2d(-29, 6));
+                .strafeToConstantHeading (new Vector2d(-28, 6));
 
         TrajectoryActionBuilder launch2 = three.fresh()
                 .strafeToLinearHeading (new Vector2d(-28, 33), Math.toRadians(-55));
@@ -927,7 +973,7 @@ public class RedFront extends LinearOpMode {
 
                         new ParallelAction(
 //                                launcher.launchOnOne(),
-                                launcher.launchOnTwo(),
+                                launcher.launchOnTwo2(),
                                 spindex.startSpindexLaunchTwo(),
                                 new SleepAction(0.4)
 
@@ -945,7 +991,7 @@ public class RedFront extends LinearOpMode {
 
                         new ParallelAction(
 //                                launcher.launchOnOne(),
-                                launcher.launchOnThree(),
+                                launcher.launchOnThreeHaha(),
                                 spindex.startSpindexLaunchThree(),
                                 new SleepAction(0.6)
                         ),
